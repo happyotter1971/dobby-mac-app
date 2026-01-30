@@ -33,23 +33,24 @@ Telegram is great for mobile/on-the-go, but when you're at your desk:
 ┌─────────────────────────────────────────────────────────────┐
 │  [≡] Dobby                    [Sessions ▾] [⚙︎] [−] [□] [×]  │ ← Title bar
 ├─────────────────┬───────────────────────────────────────────┤
-│                 │                                           │
-│  SIDEBAR        │          CHAT AREA                       │
-│                 │                                           │
-│  💬 Chat        │  ┌─────────────────────────────────────┐ │
-│  ✅ Tasks (3)   │  │ User message bubble                │ │
-│  📋 Today       │  └─────────────────────────────────────┘ │
-│  📅 Calendar    │                                           │
-│  📧 Email       │  ┌─────────────────────────────────────┐ │
-│  📊 Dashboard   │  │ 🤖 Dobby response                   │ │
-│  🔍 Search      │  │ With formatted content:              │ │
-│                 │  │ • Code blocks                       │ │
-│  ─────────────  │  │ • Tables                            │ │
-│                 │  │ • Rich markdown                     │ │
-│  Recent:        │  └─────────────────────────────────────┘ │
-│  • Main (now)   │                                           │
-│  • Research     │  ┌─────────────────────────────────────┐ │
-│  • Strategy     │  │ [🎤] Type or speak...              │ │
+│                 │ ┌───────────────────────────────────────┐ │
+│  SIDEBAR        │ │ Main  Research  Strategy  [+]        │ │ ← Session tabs
+│                 │ └───────────────────────────────────────┘ │
+│  💬 Chat        │                                           │
+│  ✅ Tasks (3)   │  ┌─────────────────────────────────────┐ │
+│  📋 Today       │  │ User message bubble                │ │
+│  📅 Calendar    │  └─────────────────────────────────────┘ │
+│  📧 Email       │                                           │
+│  📊 Dashboard   │  ┌─────────────────────────────────────┐ │
+│  🔍 Search      │  │ 🤖 Dobby response                   │ │
+│                 │  │ With formatted content:              │ │
+│  ─────────────  │  │ • Code blocks                       │ │
+│                 │  │ • Tables                            │ │
+│  Sessions:      │  │ • Rich markdown                     │ │
+│  • Main         │  └─────────────────────────────────────┘ │
+│  • Research     │                                           │
+│  • Strategy     │  ┌─────────────────────────────────────┐ │
+│                 │  │ [🎤] Type or speak...              │ │
 │                 │  └─────────────────────────────────────┘ │
 └─────────────────┴───────────────────────────────────────────┘
 ```
@@ -108,7 +109,7 @@ Click **✅ Tasks** in sidebar → Kanban-style board:
 ├───────────────────┼─────────────────────┼─────────────────────────────┤
 │                   │                     │                             │
 │ ┌───────────────┐ │ ┌───────────────┐   │ ┌───────────────┐           │
-│ │ Research IBM  │ │ │ Draft LinkedIn│   │ │ Morning email │           │
+│ │🔴 Research IBM│ │ │🟠 Draft Lin...│   │ │ Morning email │           │
 │ │ Turbonomic    │ │ │ AI post       │   │ │ scan          │           │
 │ │               │ │ │               │   │ │ ✓ Done 9:15am │           │
 │ │ 🤖 Created by │ │ │ 🤖 In progress│   │ └───────────────┘           │
@@ -116,22 +117,25 @@ Click **✅ Tasks** in sidebar → Kanban-style board:
 │ └───────────────┘ │ └───────────────┘   │ ┌───────────────┐           │
 │                   │                     │ │ Calendar prep │           │
 │ ┌───────────────┐ │ ┌───────────────┐   │ │ for Friday    │           │
-│ │ Find case     │ │ │ Weather widget│   │ │ ✓ Done 10:05am│           │
+│ │🟢 Find case   │ │ │🔴 Weather wid.│   │ │ ✓ Done 10:05am│           │
 │ │ studies for   │ │ │ research      │   │ └───────────────┘           │
 │ │ proposal      │ │ │               │   │                             │
 │ │               │ │ │ 🤖 Working... │   │ [Show More...]              │
 │ │ 👤 You added  │ │ └───────────────┘   │                             │
 │ └───────────────┘ │                     │                             │
 │                   │ ┌───────────────┐   │                             │
-│ [+]               │ │ Update MEMORY │   │                             │
+│ [+]               │ │🟠 Update MEM..│   │                             │
 │                   │ │ with Dec work │   │                             │
 │                   │ │               │   │                             │
 │                   │ │ 🤖 Reviewing  │   │                             │
 │                   │ └───────────────┘   │                             │
 └───────────────────┴─────────────────────┴─────────────────────────────┘
+
+🔴 High Priority  🟠 Medium Priority  🟢 Low Priority
 ```
 
 **Task Card Details:**
+- **Priority indicator** — 🔴 High, 🟠 Medium, 🟢 Low
 - **Title** — Brief description
 - **Status indicator** — 🤖 (Dobby working), 👤 (user created), ⏱️ (waiting)
 - **Timestamp** — When created/started/completed
@@ -142,7 +146,8 @@ Click **✅ Tasks** in sidebar → Kanban-style board:
 - **Drag & drop** between columns to change status
 - **Click task** → See details + related chat messages
 - **+ New Task** → Manually add tasks
-- **Filter** → By source (me/you), date, type
+- **Filter** → By source (me/you), priority, date, type
+- **Click priority dot** → Change priority (cycles High → Med → Low)
 
 **Smart Features:**
 - **Auto-created from chat:** "Research IBM Turbonomic" → task appears
@@ -172,8 +177,10 @@ Click **✅ Tasks** in sidebar → Kanban-style board:
 | **Smart Task Creation** | Auto-create tasks from conversations ("research X") | Zero-friction task capture |
 | **Task Progress Updates** | Real-time status as Dobby works | Transparency into AI work |
 | **Task Context Linking** | Click task → see related chat messages | Trace task history |
+| **Task Priorities** | High/Medium/Low with color coding | Visual importance ranking |
 | **Task Templates** | Pre-defined task types (research, draft, analyze) | Consistency |
 | **Multi-Session Tabs** | Multiple AI conversations side-by-side | Compare outputs, parallel work |
+| **Task Sync** | Tasks visible in Telegram too (read-only) | Cross-platform visibility |
 | **Screen Capture** | Built-in screenshot/recording | "Analyze this screen" |
 | **Voice Output** | TTS responses (optional) | Hands-free mode |
 | **Quick Notes** | Scratchpad that Dobby can see | Shared context |
@@ -259,25 +266,27 @@ Click **✅ Tasks** in sidebar → Kanban-style board:
 **Deliverable:** Working app with chat + basic task management
 
 ### Phase 2: Enhanced UX (1-2 weeks)
-11. **Smart task creation** (auto-create from conversations)
-12. **Task-message linking** (click task → see related chat)
-13. **Wispr Flow integration** (focus text field → Wispr Flow works automatically)
-14. File drag & drop
-15. Rich markdown/code rendering (syntax highlighting)
-16. Session management (tabs)
-17. Settings panel (preferences, task filters)
+11. **Task priorities** (High/Medium/Low with color indicators)
+12. **Smart task creation** (auto-create from conversations with trigger detection)
+13. **Task-message linking** (click task → see related chat)
+14. **Multi-session tabs** (parallel conversations, easy switching)
+15. **Wispr Flow integration** (focus text field → Wispr Flow works automatically)
+16. File drag & drop
+17. Rich markdown/code rendering (syntax highlighting)
+18. Settings panel (preferences, task filters, notification rules)
 
 **Deliverable:** Intelligent task tracking + enhanced chat
 
 ### Phase 3: Power Features (2-3 weeks)
-18. **Task progress updates** (real-time Dobby status)
-19. **Task templates** (pre-defined task types)
-20. Screen capture integration
-21. Calendar/email panels
-22. Dashboard widgets
-23. Custom commands
-24. Search & history (chat + tasks)
-25. Voice output (TTS)
+19. **Task sync to Telegram** (WebSocket events, read-only view on mobile)
+20. **Task progress updates** (real-time Dobby status with %)
+21. **Task templates** (pre-defined task types)
+22. Screen capture integration
+23. Calendar/email panels
+24. Dashboard widgets
+25. Custom commands ("morning brief", "eod summary")
+26. Search & history (chat + tasks, full-text)
+27. Voice output (TTS for responses, optional)
 
 **Deliverable:** Full productivity powerhouse
 
@@ -399,18 +408,18 @@ Click **✅ Tasks** in sidebar → Kanban-style board:
 
 ---
 
-## 8. Open Questions
+## 8. Design Decisions
 
 1. ~~**Voice:** Always-on ("Hey Dobby") or push-to-talk only?~~ ✅ **Using Wispr Flow** (external)
-2. **Notifications:** How aggressive? (every message vs important only)
-3. **Multi-session:** Do you want parallel conversations? (research + strategy at once)
-4. **Sync:** Should Mac app work if gateway is down? (offline mode for tasks?)
-5. **Distribution:** Mac App Store or direct download?
-6. **Branding:** Keep "Dobby" name or something else for the app?
-7. **Task auto-creation:** Which phrases trigger tasks? ("research X", "draft Y", "find Z"?)
-8. **Task visibility:** Should tasks sync to Telegram too, or Mac-only?
-9. **Task archiving:** Auto-archive completed tasks after X days?
-10. **Task priorities:** Add priority levels (high/medium/low) or keep it simple?
+2. ~~**Notifications:** How aggressive?~~ ✅ **Important only** (urgent emails, deadlines, errors)
+3. ~~**Multi-session:** Parallel conversations?~~ ✅ **YES** - tabs for different contexts
+4. **Sync:** Should Mac app work if gateway is down? (offline mode for tasks?) — TBD
+5. **Distribution:** Mac App Store or direct download? — TBD
+6. **Branding:** Keep "Dobby" name or something else for the app? — TBD
+7. ~~**Task auto-creation:** Which phrases?~~ ✅ **Conservative triggers** (research, draft, find, analyze, summarize, compare, create)
+8. ~~**Task visibility:** Sync to Telegram?~~ ✅ **YES** - sync tasks across all interfaces
+9. **Task archiving:** Auto-archive completed tasks after X days? — TBD (suggest 30 days)
+10. ~~**Task priorities:** Add levels?~~ ✅ **YES** - High/Medium/Low priority
 
 ---
 
@@ -482,12 +491,19 @@ enum TaskSource: String, Codable {
     case automated  // System-generated (e.g., scheduled)
 }
 
+enum TaskPriority: String, Codable {
+    case high
+    case medium
+    case low
+}
+
 @Model
 class Task {
     @Attribute(.unique) var id: UUID
     var title: String
     var status: TaskStatus
     var source: TaskSource
+    var priority: TaskPriority
     var createdAt: Date
     var updatedAt: Date
     var completedAt: Date?
@@ -525,16 +541,26 @@ class Task {
 
 ### C. Smart Detection Rules
 
-**Trigger phrases for auto-task creation:**
-- "research [topic]"
-- "draft [document type]"
-- "find [number] [things]"
-- "analyze [thing]"
-- "summarize [thing]"
-- "compare [A] and [B]"
-- "create [deliverable]"
+**Trigger phrases for auto-task creation (conservative start):**
+- **Research:** "research [topic]", "look into [topic]", "investigate [topic]"
+- **Draft:** "draft [document]", "write [document]", "create draft of [thing]"
+- **Find:** "find [X number of] [things]", "get me [X] examples of [thing]"
+- **Analyze:** "analyze [thing]", "break down [thing]", "review [thing]"
+- **Summarize:** "summarize [document/URL]", "give me the key points from [thing]"
+- **Compare:** "compare [A] vs [B]", "what's the difference between [A] and [B]"
+- **Create:** "create [deliverable]", "build [thing]", "make [thing]"
 
-**Confidence threshold:** Only create task if >80% confidence it's a request for work (not a question about how to do something).
+**Confidence threshold:** Only create task if >80% confidence it's a work request, not a question.
+
+**Examples that should NOT create tasks:**
+- "How do I research X?" (asking for advice, not requesting work)
+- "What's the weather?" (simple lookup, not a task)
+- "Did you find anything about X?" (follow-up question)
+
+**Priority assignment (auto-created tasks):**
+- Default: Medium (🟠)
+- User can adjust after creation
+- Learn from patterns over time (future enhancement)
 
 ### D. UI States
 
