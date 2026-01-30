@@ -15,6 +15,8 @@ Native macOS application for the Dobby AI assistant, built with Swift + SwiftUI.
 
 🚧 **Design Phase** — See [DESIGN.md](DESIGN.md) for full specifications
 
+📐 **UI/UX Design** — See [UI-DESIGN.md](UI-DESIGN.md) for visual guidelines
+
 ## Tech Stack
 
 - **Language:** Swift

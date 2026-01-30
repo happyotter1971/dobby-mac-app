@@ -14,6 +14,31 @@
 - **Native feel** — Mac-first design (not a web wrapper)
 - **Power user focused** — Keyboard shortcuts, quick actions, rich content
 - **Seamless** — Shares same backend as Telegram (unified history)
+- **Beautiful & minimal** — Clean, modern, delightful to use
+
+### UI/UX Philosophy
+**Cool, Clean, Easy** — Inspired by Linear, Arc, Things 3, Raycast
+
+**Cool:**
+- Smooth animations (SwiftUI native)
+- Glassmorphism/translucency (Mac vibrancy)
+- Subtle micro-interactions
+- Premium feel
+- Dark mode first (light mode support)
+
+**Clean:**
+- Generous whitespace
+- Clear visual hierarchy
+- Minimal UI chrome
+- Focus on content
+- No clutter
+
+**Easy:**
+- Intuitive, zero learning curve
+- Visible shortcuts
+- Instant feedback
+- Consistent patterns
+- Forgiving (easy undo)
 
 ### Why Build This?
 Telegram is great for mobile/on-the-go, but when you're at your desk:
