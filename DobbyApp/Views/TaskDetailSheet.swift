@@ -1,10 +1,12 @@
 import SwiftUI
 import SwiftData
+import AppKit
 
 struct TaskDetailSheet: View {
     @Bindable var task: Task
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @State private var resultCopied = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,7 +31,8 @@ struct TaskDetailSheet: View {
                 // Result section - prominently at the top if available
                 if let resultSummary = task.resultSummary {
                     Section {
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            // Header with copy button
                             HStack {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(.green)
@@ -37,14 +40,36 @@ struct TaskDetailSheet: View {
                                 Text("Task Result")
                                     .font(.headline)
                                     .foregroundStyle(.primary)
+                                Spacer()
+                                Button {
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString(resultSummary, forType: .string)
+                                    resultCopied = true
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                        resultCopied = false
+                                    }
+                                } label: {
+                                    Label(resultCopied ? "Copied!" : "Copy", systemImage: resultCopied ? "checkmark" : "doc.on.doc")
+                                        .font(.caption)
+                                }
+                                .buttonStyle(.bordered)
                             }
+                            .padding(.bottom, 12)
 
-                            MarkdownText(content: resultSummary)
-                                .textSelection(.enabled)
-                                .padding(12)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color.green.opacity(0.1))
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            // Scrollable result content
+                            ScrollView {
+                                RichMarkdownText(content: resultSummary)
+                                    .textSelection(.enabled)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .frame(maxHeight: 250)
+                            .padding(12)
+                            .background(Color(.textBackgroundColor).opacity(0.5))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                            )
                         }
                         .padding(.vertical, 8)
                     }

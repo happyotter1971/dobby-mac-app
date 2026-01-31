@@ -40,29 +40,32 @@ struct TasksView: View {
             // Kanban board
             HStack(alignment: .top, spacing: 16) {
                 TaskColumn(
-                    title: "📝 BACKLOG",
+                    title: "Backlog",
                     count: backlogTasks.count,
                     tasks: backlogTasks,
                     allTasks: tasks,
                     selectedTask: $selectedTask,
+                    emptyMessage: "No tasks in backlog",
                     onDrop: { task in updateTaskStatus(task, to: .backlog) }
                 )
 
                 TaskColumn(
-                    title: "🚧 IN PROCESS",
+                    title: "In Progress",
                     count: inProcessTasks.count,
                     tasks: inProcessTasks,
                     allTasks: tasks,
                     selectedTask: $selectedTask,
+                    emptyMessage: "Drag a task here to start",
                     onDrop: { task in updateTaskStatus(task, to: .inProcess) }
                 )
 
                 TaskColumn(
-                    title: "✅ COMPLETED",
+                    title: "Completed",
                     count: completedTasks.count,
                     tasks: completedTasks,
                     allTasks: tasks,
                     selectedTask: $selectedTask,
+                    emptyMessage: "No completed tasks yet",
                     onDrop: { task in updateTaskStatus(task, to: .completed) }
                 )
             }
@@ -143,23 +146,51 @@ struct TaskColumn: View {
     let tasks: [Task]
     let allTasks: [Task]
     @Binding var selectedTask: Task?
+    var emptyMessage: String = "No tasks"
     let onDrop: (Task) -> Void
     @State private var isTargeted = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Column header
-            Text("\(title) (\(count))")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.secondary)
+            // Column header with count badge
+            HStack(spacing: 8) {
+                Text(title.uppercased())
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.secondary)
+                    .tracking(0.5)
+
+                Text("\(count)")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(
+                        Capsule()
+                            .fill(count > 0 ? Color.accentColor : Color.gray.opacity(0.5))
+                    )
+            }
 
             ScrollView {
-                LazyVStack(spacing: 12) {
-                    ForEach(tasks) { task in
-                        TaskCard(task: task)
-                            .onTapGesture {
-                                selectedTask = task
-                            }
+                LazyVStack(spacing: 10) {
+                    if tasks.isEmpty {
+                        // Empty state
+                        VStack(spacing: 8) {
+                            Image(systemName: "tray")
+                                .font(.system(size: 24))
+                                .foregroundStyle(.tertiary)
+                            Text(emptyMessage)
+                                .font(.system(size: 13))
+                                .foregroundStyle(.tertiary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 40)
+                    } else {
+                        ForEach(tasks) { task in
+                            TaskCard(task: task)
+                                .onTapGesture {
+                                    selectedTask = task
+                                }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, minHeight: 50)
@@ -217,163 +248,124 @@ struct TaskCard: View {
         task.status == .inProcess && (task.progressPercent ?? 0) < 100
     }
 
+    private var priorityColor: Color {
+        switch task.priority {
+        case .high: return .red
+        case .medium: return .orange
+        case .low: return .green
+        }
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Execution status badge
-            if isExecuting {
-                HStack(spacing: 6) {
-                    ProgressView()
-                        .scaleEffect(0.6)
-                        .frame(width: 12, height: 12)
-                    Text("Executing...")
-                        .font(.caption2.bold())
-                    if let progress = task.progressPercent, progress > 0 {
-                        Text("\(progress)%")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+        HStack(spacing: 0) {
+            // Priority indicator - colored left border
+            RoundedRectangle(cornerRadius: 2)
+                .fill(priorityColor)
+                .frame(width: 4)
+                .padding(.vertical, 8)
+
+            VStack(alignment: .leading, spacing: 8) {
+                // Execution status badge
+                if isExecuting {
+                    HStack(spacing: 6) {
+                        ProgressView()
+                            .scaleEffect(0.6)
+                            .frame(width: 12, height: 12)
+                        Text("Running...")
+                            .font(.caption2.bold())
                     }
+                    .foregroundStyle(.blue)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.blue.opacity(0.15))
+                    .clipShape(Capsule())
                 }
-                .foregroundStyle(.blue)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(
-                    Color.blue.opacity(pulseAnimation ? 0.25 : 0.15)
-                )
-                .clipShape(Capsule())
-                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: pulseAnimation)
-                .onAppear {
-                    pulseAnimation = true
-                }
-            }
 
-            // Result available badge
-            if task.status == .completed, task.resultSummary != nil {
-                HStack(spacing: 6) {
-                    Image(systemName: "doc.text.fill")
-                        .font(.system(size: 10))
-                    Text("View Result")
-                        .font(.caption2.bold())
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 8))
+                // Result available badge
+                if task.status == .completed, task.resultSummary != nil {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 10))
+                        Text("View Result")
+                            .font(.caption2.bold())
+                    }
+                    .foregroundStyle(.green)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.green.opacity(0.15))
+                    .clipShape(Capsule())
                 }
-                .foregroundStyle(.green)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.green.opacity(0.15))
-                .clipShape(Capsule())
-            }
-            // Priority + Title
-            HStack(alignment: .top, spacing: 8) {
-                Text(task.priority.emoji)
-                    .font(.system(size: 12))
 
+                // Title only (no priority emoji)
                 Text(task.title)
                     .font(.system(size: 14, weight: .medium))
                     .lineLimit(2)
-            }
+                    .fixedSize(horizontal: false, vertical: true)
 
-            // Tags
-            if !task.tags.isEmpty {
-                FlowLayout(spacing: 4) {
-                    ForEach(task.tags.prefix(3), id: \.self) { tag in
-                        Text(tag)
-                            .font(.system(size: 9))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.blue.opacity(0.15))
-                            .clipShape(Capsule())
+                // Due date indicator (compact)
+                if let dueDate = task.dueDate {
+                    HStack(spacing: 4) {
+                        Image(systemName: isOverdue ? "exclamationmark.triangle.fill" : "calendar")
+                            .font(.system(size: 10))
+                        Text(dueDate, style: .relative)
+                            .font(.caption2)
                     }
-                    if task.tags.count > 3 {
-                        Text("+\(task.tags.count - 3)")
-                            .font(.system(size: 9))
-                            .foregroundStyle(.secondary)
+                    .foregroundStyle(dueDateColor)
+                }
+
+                // Tags count indicator (if any)
+                if !task.tags.isEmpty {
+                    HStack(spacing: 4) {
+                        Image(systemName: "tag")
+                            .font(.system(size: 10))
+                        Text("\(task.tags.count)")
+                            .font(.caption2)
                     }
+                    .foregroundStyle(.secondary)
                 }
             }
-
-            // Due date indicator
-            if let dueDate = task.dueDate {
-                HStack(spacing: 4) {
-                    Image(systemName: isOverdue ? "exclamationmark.triangle.fill" : "calendar")
-                        .font(.system(size: 10))
-                    Text(dueDate, style: .relative)
-                        .font(.caption2)
-                }
-                .foregroundStyle(dueDateColor)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 3)
-                .background(dueDateColor.opacity(0.15))
-                .clipShape(Capsule())
-            }
-
-            Spacer()
-            
-            // Source indicator
-            HStack(spacing: 4) {
-                Image(systemName: task.source == .dobby ? "sparkles" : "person.fill")
-                    .font(.system(size: 10))
-                Text(task.source == .dobby ? "Created by Dobby" : "You added")
-                    .font(.caption2)
-            }
-            .foregroundStyle(.secondary)
-            
-            // Timestamp
-            Text(task.createdAt, style: .relative)
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
-
-            // Progress bar for executing tasks
-            if isExecuting, let progress = task.progressPercent, progress > 0 {
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        // Background
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(Color.blue.opacity(0.2))
-                            .frame(height: 4)
-
-                        // Progress
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(Color.blue)
-                            .frame(width: geometry.size.width * CGFloat(progress) / 100.0, height: 4)
-                    }
-                }
-                .frame(height: 4)
-            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding()
-        .frame(minHeight: 100)
         .background(
-            ZStack {
-                Color(.windowBackgroundColor)
-                // Subtle glow effect for executing tasks
-                if isExecuting {
-                    Color.blue.opacity(0.05)
-                }
-            }
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(.windowBackgroundColor))
+                .shadow(
+                    color: isExecuting ? Color.blue.opacity(pulseAnimation ? 0.3 : 0.15) : .black.opacity(isHovered ? 0.08 : 0.04),
+                    radius: isExecuting ? 8 : (isHovered ? 6 : 3)
+                )
         )
-        .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 10)
                 .stroke(
-                    isExecuting ? Color.blue.opacity(0.5) : Color(.separatorColor),
+                    isExecuting ? Color.blue.opacity(pulseAnimation ? 0.6 : 0.3) : Color(.separatorColor).opacity(0.5),
                     lineWidth: isExecuting ? 2 : 1
                 )
         )
-        .shadow(color: .black.opacity(isHovered ? 0.1 : 0.05), radius: isHovered ? 8 : 4)
-        .scaleEffect(isHovered ? 1.02 : 1.0)
+        .scaleEffect(isHovered ? 1.01 : 1.0)
         .animation(.spring(response: 0.3), value: isHovered)
+        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: pulseAnimation)
         .onHover { hovering in
             isHovered = hovering
         }
+        .onAppear {
+            if isExecuting {
+                pulseAnimation = true
+            }
+        }
+        .onChange(of: isExecuting) { _, newValue in
+            pulseAnimation = newValue
+        }
         .draggable(task.id.uuidString) {
             // Drag preview
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(task.priority.emoji)
-                    Text(task.title)
-                        .font(.system(size: 14, weight: .medium))
-                        .lineLimit(1)
-                }
+            HStack(spacing: 8) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(priorityColor)
+                    .frame(width: 4, height: 20)
+                Text(task.title)
+                    .font(.system(size: 14, weight: .medium))
+                    .lineLimit(1)
             }
             .padding(12)
             .background(Color(.windowBackgroundColor))

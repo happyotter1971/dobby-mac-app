@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Dobby Mac app connects to the Clawdbot Gateway via WebSocket at `ws://127.0.0.1:18789` using the **official Clawdbot Gateway RPC protocol**. This is the same protocol used by the Control UI, CLI, and other gateway clients.
+The Dobby Mac app connects to the Clawdbot Gateway via WebSocket at `ws://127.0.0.1:18790` using the **official Clawdbot Gateway RPC protocol**. This is the same protocol used by the Control UI, CLI, and other gateway clients.
 
 ## Architecture
 
@@ -380,5 +380,5 @@ curl --include \
      --header "Upgrade: websocket" \
      --header "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" \
      --header "Sec-WebSocket-Version: 13" \
-     http://127.0.0.1:18789/ws
+     http://127.0.0.1:18790
 ```

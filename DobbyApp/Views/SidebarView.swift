@@ -10,21 +10,25 @@ struct SidebarView: View {
     @State private var showingNewSessionSheet = false
     @State private var newSessionName = ""
     @State private var newSessionIcon = "bubble.left.fill"
+    @State private var isChatExpanded: Bool = true
 
     var body: some View {
         List(selection: $selectedView) {
-            Section {
-                ForEach(NavigationItem.allCases, id: \.self) { item in
-                    NavigationLink(value: item) {
-                        Label(item.rawValue, systemImage: item.icon)
-                    }
-                }
-            }
-
-            Section(header: Text("Sessions")) {
+            DisclosureGroup(isExpanded: $isChatExpanded) {
                 ForEach(sessions) { session in
-                    NavigationLink(value: session) {
-                        Label(session.name, systemImage: session.icon)
+                    HStack {
+                        Text(session.name)
+                        Spacer()
+                        if session.id.uuidString == settings.activeSessionId {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(.accentColor)
+                                .font(.caption)
+                        }
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        settings.activeSessionId = session.id.uuidString
+                        selectedView = .chat
                     }
                     .contextMenu {
                         Button("Delete", role: .destructive) {
@@ -32,17 +36,28 @@ struct SidebarView: View {
                         }
                     }
                 }
+            } label: {
+                HStack {
+                    Label("Chat", systemImage: "bubble.left.fill")
+                    Spacer()
+                    Button(action: { showingNewSessionSheet = true }) {
+                        Image(systemName: "plus")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("New Session")
+                }
+            }
+
+            ForEach([NavigationItem.tasks, .today, .search, .archived], id: \.self) { item in
+                NavigationLink(value: item) {
+                    Label(item.rawValue, systemImage: item.icon)
+                }
             }
         }
         .listStyle(.sidebar)
         .navigationTitle("Dobby")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button(action: { showingNewSessionSheet = true }) {
-                    Label("New Session", systemImage: "plus")
-                }
-            }
-        }
         .onAppear(perform: ensureDefaultSession)
         .sheet(isPresented: $showingNewSessionSheet) {
             NewSessionSheet(

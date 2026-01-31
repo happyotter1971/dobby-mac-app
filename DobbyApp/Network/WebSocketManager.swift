@@ -23,7 +23,7 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
     var onHistoryLoaded: (([HistoryMessage]) -> Void)?
     
     // Gateway URL
-    private let gatewayURLString = "ws://127.0.0.1:18790"
+    private let gatewayURLString = "ws://127.0.0.1:18790/ws"
     
     // Reconnection
     private var reconnectTimer: Timer?
@@ -33,10 +33,12 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
     // Request tracking
     private var pendingRequests: [String: (Bool, Any?, GatewayError?) -> Void] = [:]
 
-    // Offline task sync queue
-    private var pendingTaskCreations: [(String, TaskPriority, UUID)] = []
-    private var pendingTaskUpdates: [(UUID, TaskStatus)] = []
-    
+    // Task execution tracking: maps runId to taskId
+    private var executingTasks: [String: UUID] = [:]
+    // Accumulated agent response text for each runId
+    private var agentResponseText: [String: String] = [:]
+
+
     private override init() {
         super.init()
         setupURLSession()
@@ -44,8 +46,9 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
     
     private func setupURLSession() {
         let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 30
-        config.timeoutIntervalForResource = 60
+        // Use longer timeouts for WebSocket - it's a long-lived connection
+        config.timeoutIntervalForRequest = 300  // 5 minutes
+        config.timeoutIntervalForResource = 600 // 10 minutes
         urlSession = URLSession(configuration: config, delegate: self, delegateQueue: OperationQueue())
     }
     
@@ -176,17 +179,23 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
 
             switch event.event {
             case "connect.challenge":
-                if let nonce = event.payload?["nonce"] as? String {
+                if let nonceCodable = event.payload?["nonce"],
+                   let nonce = nonceCodable.value as? String {
                     print("🔑 Received connect challenge with nonce: \(nonce)")
                     connectNonce = nonce
                     sendConnectHandshake()
+                } else {
+                    print("❌ Failed to extract nonce from connect.challenge payload")
                 }
 
             case "chat":
-                handleChatEvent(event.payload)
+                handleChatEvent(event.payload?.unwrapped)
 
             case "task.created", "task.progress", "task.completed":
-                handleTaskEvent(event.event, payload: event.payload)
+                handleTaskEvent(event.event, payload: event.payload?.unwrapped)
+
+            case "agent":
+                handleAgentEvent(event.payload?.unwrapped)
 
             default:
                 print("📨 Event: \(event.event)")
@@ -217,7 +226,7 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
             }
             
             if let handler = pendingRequests[response.id] {
-                handler(response.ok, response.result, response.error)
+                handler(response.ok, response.responseData, response.error)
                 pendingRequests.removeValue(forKey: response.id)
             }
         } catch {
@@ -226,19 +235,46 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
     }
     
     private func handleChatEvent(_ payload: [String: Any]?) {
-        guard let payload = payload,
-              let state = payload["state"] as? String,
-              state == "final",
-              let message = payload["message"] as? [String: Any],
-              let content = message["content"] as? [[String: Any]],
-              let firstPart = content.first,
-              let text = firstPart["text"] as? String else {
+        print("💬 handleChatEvent called with payload: \(String(describing: payload))")
+
+        guard let payload = payload else {
+            print("❌ Chat event: payload is nil")
             return
         }
-        
+
+        guard let state = payload["state"] as? String else {
+            print("❌ Chat event: no state field")
+            return
+        }
+
+        print("💬 Chat event state: \(state)")
+
+        guard state == "final" else {
+            print("⏳ Chat event: state is '\(state)', waiting for final...")
+            return
+        }
+
+        guard let message = payload["message"] as? [String: Any] else {
+            print("❌ Chat event: no message field")
+            return
+        }
+
+        guard let content = message["content"] as? [[String: Any]] else {
+            print("❌ Chat event: no content array in message")
+            return
+        }
+
+        guard let firstPart = content.first,
+              let text = firstPart["text"] as? String else {
+            print("❌ Chat event: no text in content")
+            return
+        }
+
+        print("✅ Chat event: received text: \(text.prefix(100))...")
+
         let sessionKey = payload["sessionKey"] as? String ?? "main"
         let chatMsg = GatewayChatMessage(content: text, isFromUser: false, sessionKey: sessionKey)
-        
+
         DispatchQueue.main.async {
             self.onMessageReceived?(chatMsg)
         }
@@ -273,6 +309,64 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
             }
         } catch {
             print("❌ Failed to parse task event: \(error)")
+        }
+    }
+
+    private func handleAgentEvent(_ payload: [String: Any]?) {
+        guard let payload = payload,
+              let runId = payload["runId"] as? String,
+              let stream = payload["stream"] as? String else {
+            print("⚠️ Agent event: missing runId or stream")
+            return
+        }
+
+        // Only process events for tasks we're tracking
+        guard let taskId = executingTasks[runId] else {
+            print("📨 Agent event for non-tracked runId: \(runId) (stream: \(stream))")
+            return
+        }
+
+        print("🤖 Agent event for task \(taskId): stream=\(stream)")
+
+        switch stream {
+        case "lifecycle":
+            // Check for completion
+            if let data = payload["data"] as? [String: Any],
+               let phase = data["phase"] as? String {
+                print("🔄 Agent lifecycle for task \(taskId): \(phase)")
+
+                if phase == "end" {
+                    // Task completed - get the accumulated response
+                    let resultSummary = agentResponseText[runId] ?? ""
+                    print("✅ Task completed: \(taskId) with result: \(resultSummary.prefix(100))...")
+
+                    let update = TaskUpdate(
+                        type: "task.completed",
+                        taskId: taskId,
+                        status: .completed,
+                        progress: 100,
+                        resultSummary: resultSummary.isEmpty ? nil : resultSummary
+                    )
+
+                    DispatchQueue.main.async {
+                        self.onTaskUpdate?(update)
+                    }
+
+                    // Clean up tracking
+                    executingTasks.removeValue(forKey: runId)
+                    agentResponseText.removeValue(forKey: runId)
+                }
+            }
+
+        case "assistant":
+            // Accumulate the response text
+            if let data = payload["data"] as? [String: Any],
+               let text = data["text"] as? String {
+                agentResponseText[runId] = text
+            }
+
+        default:
+            break
         }
     }
     
@@ -326,7 +420,7 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
             minProtocol: 3,
             maxProtocol: 3,
             role: "operator",
-            scopes: ["operator.admin", "operator.write", "operator.read"],
+            scopes: ["operator.write", "operator.read", "operator.admin"],
             client: ClientInfo(
                 id: "clawdbot-macos",
                 displayName: "Dobby Mac App",
@@ -388,42 +482,16 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
     }
     
     func createTask(title: String, priority: TaskPriority = .medium, taskId: UUID = UUID()) {
-        if !isConnected {
-            pendingTaskCreations.append((title, priority, taskId))
-            print("⏳ Queued task creation: \(title)")
-            return
-        }
-        let params = TaskCreateParams(
-            taskId: taskId.uuidString,
-            title: title,
-            priority: priority.rawValue
-        )
-        sendRequest(method: "task.create", params: params) { ok, _, error in
-            if ok {
-                print("✅ Task created: \(title)")
-            } else {
-                print("❌ Task creation failed: \(error?.message ?? "unknown")")
-            }
-        }
+        // Tasks are managed locally in SwiftData
+        // The gateway doesn't have a task.create method - tasks are created by the agent
+        // or locally by the user. This is a no-op for gateway sync.
+        print("📝 Task created locally: \(title) (id: \(taskId))")
     }
 
     func updateTask(taskId: UUID, status: TaskStatus) {
-        if !isConnected {
-            pendingTaskUpdates.append((taskId, status))
-            print("⏳ Queued task update: \(taskId)")
-            return
-        }
-        let params = TaskUpdateParams(
-            taskId: taskId.uuidString,
-            status: status.rawValue
-        )
-        sendRequest(method: "task.update", params: params) { ok, _, error in
-            if ok {
-                print("✅ Task updated: \(taskId)")
-            } else {
-                print("❌ Task update failed: \(error?.message ?? "unknown")")
-            }
-        }
+        // Tasks are managed locally in SwiftData
+        // The gateway doesn't have a task.update method - status updates are local only.
+        print("📝 Task status updated locally: \(taskId) -> \(status.rawValue)")
     }
 
     func executeTask(taskId: UUID, title: String) {
@@ -431,23 +499,38 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
             print("⚠️ Cannot execute task: not connected")
             return
         }
-        let params = TaskExecuteParams(taskId: taskId.uuidString, title: title)
-        sendRequest(method: "task.execute", params: params) { ok, _, error in
+
+        // Execute tasks by sending them as chat messages to the agent
+        // The agent will process the task and send back progress/completion events
+        let taskPrompt = "Execute task: \(title)"
+        let runId = "task-\(taskId.uuidString)"
+        print("🚀 Executing task via chat.send: \(title) (runId: \(runId))")
+
+        // Track this task execution
+        executingTasks[runId] = taskId
+        agentResponseText[runId] = ""
+
+        let params = ChatSendParams(
+            sessionKey: "main",
+            message: taskPrompt,
+            idempotencyKey: runId
+        )
+
+        sendRequest(method: "chat.send", params: params) { [weak self] ok, _, error in
             if ok {
                 print("✅ Task execution started: \(title)")
             } else {
                 print("❌ Task execution failed: \(error?.message ?? "unknown") (\(error?.code ?? "none")) for task: \(title)")
+                // Clean up tracking on failure
+                self?.executingTasks.removeValue(forKey: runId)
+                self?.agentResponseText.removeValue(forKey: runId)
             }
         }
     }
 
     private func flushPendingTaskSync() {
-        print("🔄 Flushing pending task syncs...")
-        pendingTaskCreations.forEach { createTask(title: $0, priority: $1, taskId: $2) }
-        pendingTaskCreations.removeAll()
-        pendingTaskUpdates.forEach { updateTask(taskId: $0, status: $1) }
-        pendingTaskUpdates.removeAll()
-        print("✅ Flushed all pending task syncs")
+        // Tasks are managed locally - no sync needed
+        print("✅ Ready for task operations")
     }
 }
 
@@ -487,13 +570,14 @@ struct AnyCodable: Codable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        if let intVal = try? container.decode(Int.self) { value = intVal }
+        if container.decodeNil() { value = NSNull() }
+        else if let intVal = try? container.decode(Int.self) { value = intVal }
         else if let doubleVal = try? container.decode(Double.self) { value = doubleVal }
         else if let boolVal = try? container.decode(Bool.self) { value = boolVal }
         else if let stringVal = try? container.decode(String.self) { value = stringVal }
         else if let arrayVal = try? container.decode([AnyCodable].self) { value = arrayVal.map { $0.value } }
         else if let dictVal = try? container.decode([String: AnyCodable].self) { value = dictVal.mapValues { $0.value } }
-        else { throw DecodingError.typeMismatch(AnyCodable.self, .init(codingPath: decoder.codingPath, debugDescription: "Unsupported type")) }
+        else { value = NSNull() } // Fallback for unsupported types instead of throwing
     }
 
     func encode(to encoder: Encoder) throws {
@@ -507,6 +591,12 @@ struct AnyCodable: Codable {
         case let dictVal as [String: Any]: try container.encode(dictVal.mapValues { AnyCodable($0) })
         default: throw EncodingError.invalidValue(value, .init(codingPath: encoder.codingPath, debugDescription: "Unsupported type"))
         }
+    }
+}
+
+extension Dictionary where Key == String, Value == AnyCodable {
+    var unwrapped: [String: Any] {
+        mapValues { $0.value }
     }
 }
 
@@ -525,7 +615,13 @@ struct ResponseFrame: Codable {
     let id: String
     let ok: Bool
     let result: [String: AnyCodable]?
+    let payload: [String: AnyCodable]?
     let error: GatewayError?
+
+    // Gateway uses "payload" for successful responses, normalize to "result"
+    var responseData: [String: Any]? {
+        (payload ?? result)?.unwrapped
+    }
 }
 
 struct RequestFrame<T: Encodable>: Encodable {
@@ -560,17 +656,6 @@ struct ChatHistoryParams: Encodable {
     let sessionKey: String, limit: Int
 }
 
-struct TaskExecuteParams: Encodable {
-    let taskId: String, title: String
-}
-
-struct TaskCreateParams: Encodable {
-    let taskId: String, title: String, priority: String
-}
-
-struct TaskUpdateParams: Encodable {
-    let taskId: String, status: String
-}
 
 struct GatewayError: Codable {
     let code: String, message: String

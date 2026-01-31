@@ -5,83 +5,183 @@ struct MarkdownText: View {
     let content: String
 
     var body: some View {
-        Text((try? AttributedString(markdown: content)) ?? AttributedString(content))
+        Text((try? AttributedString(markdown: preprocessMarkdown(content))) ?? AttributedString(content))
             .textSelection(.enabled)
             .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func preprocessMarkdown(_ text: String) -> String {
+        // Convert single newlines to hard line breaks (two spaces + newline)
+        // but preserve double newlines as paragraph breaks
+        var result = text
+        // First, protect double newlines
+        result = result.replacingOccurrences(of: "\n\n", with: "{{PARA}}")
+        // Convert single newlines to hard breaks
+        result = result.replacingOccurrences(of: "\n", with: "  \n")
+        // Restore paragraph breaks
+        result = result.replacingOccurrences(of: "{{PARA}}", with: "\n\n")
+        return result
     }
 }
 
 // Keep a more robust version that handles code blocks with copy buttons
 struct RichMarkdownText: View {
     let content: String
-    private let segments: [MarkdownSegment]
+    private let paragraphs: [String]
 
     init(content: String) {
         self.content = content
-        self.segments = Self.parseContent(content)
+        self.paragraphs = Self.parseIntoParagraphs(content)
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(segments) { segment in
-                switch segment.type {
-                case .text:
-                    Text((try? AttributedString(markdown: segment.text)) ?? AttributedString(segment.text))
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
+                if paragraph.hasPrefix("```") {
+                    // Code block
+                    let parts = Self.parseCodeBlock(paragraph)
+                    CodeBlockView(language: parts.language, code: parts.code)
+                } else {
+                    // Regular text paragraph
+                    Text((try? AttributedString(markdown: paragraph)) ?? AttributedString(paragraph))
                         .textSelection(.enabled)
-                case .code(let language):
-                    CodeBlockView(language: language, code: segment.text)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineSpacing(4)
                 }
             }
         }
     }
 
-    private static func parseContent(_ text: String) -> [MarkdownSegment] {
-        var segments: [MarkdownSegment] = []
-        let pattern = "```(.*?)\\n([\\s\\S]*?)```"
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators) else {
-            return [.init(type: .text, text: text)]
-        }
-        
-        let range = NSRange(text.startIndex..., in: text)
-        let matches = regex.matches(in: text, options: [], range: range)
-        
-        var lastEnd = text.startIndex
-        for match in matches {
-            if let textRange = Range(match.range(at: 0), in: text) {
-                // Add text before the code block
-                if textRange.lowerBound > lastEnd {
-                    let textSegment = String(text[lastEnd..<textRange.lowerBound])
-                    if !textSegment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        segments.append(.init(type: .text, text: textSegment))
+    private static func parseIntoParagraphs(_ text: String) -> [String] {
+        var result: [String] = []
+        var current = ""
+        var inCodeBlock = false
+
+        let lines = text.components(separatedBy: "\n")
+
+        for line in lines {
+            if line.hasPrefix("```") {
+                if inCodeBlock {
+                    // End of code block
+                    current += line
+                    result.append(current.trimmingCharacters(in: .whitespaces))
+                    current = ""
+                    inCodeBlock = false
+                } else {
+                    // Start of code block - save any pending text first
+                    if !current.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        result.append(contentsOf: splitTextIntoParagraphs(current))
                     }
+                    current = line + "\n"
+                    inCodeBlock = true
                 }
-
-                // Add the code block
-                let langRange = Range(match.range(at: 1), in: text)
-                let codeRange = Range(match.range(at: 2), in: text)
-                let language = langRange.map { String(text[$0]) } ?? ""
-                let code = codeRange.map { String(text[$0]) } ?? ""
-                segments.append(.init(type: .code(language: language.isEmpty ? nil : language), text: code))
-
-                lastEnd = textRange.upperBound
+            } else if inCodeBlock {
+                current += line + "\n"
+            } else {
+                current += line + "\n"
             }
         }
 
-        // Add any remaining text after the last code block
-        if lastEnd < text.endIndex {
-            let remainingText = String(text[lastEnd...])
-            if !remainingText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                segments.append(.init(type: .text, text: remainingText))
+        // Handle remaining content
+        if !current.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if inCodeBlock {
+                result.append(current)
+            } else {
+                result.append(contentsOf: splitTextIntoParagraphs(current))
             }
         }
-        
-        // If no matches, it's all text
-        if segments.isEmpty {
-            segments.append(.init(type: .text, text: text))
-        }
 
-        return segments
+        return result.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
+
+    private static func splitTextIntoParagraphs(_ text: String) -> [String] {
+        // Split on double newlines first
+        var paragraphs = text.components(separatedBy: "\n\n")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+
+        // Further split paragraphs that have bold headers (e.g., "**Header:** content")
+        var result: [String] = []
+        for para in paragraphs {
+            let split = splitOnBoldHeaders(para)
+            result.append(contentsOf: split)
+        }
+
+        return result
+    }
+
+    private static func splitOnBoldHeaders(_ text: String) -> [String] {
+        // Pattern: **Bold Header:** followed by content
+        // Split these into separate paragraphs for better readability
+        let pattern = #"(\*\*[^*]+:\*\*)"#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            return [text]
+        }
+
+        let range = NSRange(text.startIndex..., in: text)
+        let matches = regex.matches(in: text, range: range)
+
+        if matches.isEmpty {
+            return [text]
+        }
+
+        var result: [String] = []
+        var lastEnd = text.startIndex
+
+        for match in matches {
+            guard let matchRange = Range(match.range, in: text) else { continue }
+
+            // Add text before this header (if any)
+            if matchRange.lowerBound > lastEnd {
+                let beforeText = String(text[lastEnd..<matchRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+                if !beforeText.isEmpty {
+                    result.append(beforeText)
+                }
+            }
+
+            lastEnd = matchRange.lowerBound
+        }
+
+        // Add remaining text (includes the headers and their content)
+        if lastEnd < text.endIndex {
+            let remaining = String(text[lastEnd...]).trimmingCharacters(in: .whitespacesAndNewlines)
+            if !remaining.isEmpty {
+                // Split by bold headers but keep header with its content
+                let headerPattern = #"(\*\*[^*]+:\*\*\s*)"#
+                if let headerRegex = try? NSRegularExpression(pattern: headerPattern) {
+                    let parts = headerRegex.stringByReplacingMatches(
+                        in: remaining,
+                        range: NSRange(remaining.startIndex..., in: remaining),
+                        withTemplate: "\n\n$1"
+                    )
+                    let splitParts = parts.components(separatedBy: "\n\n")
+                        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                        .filter { !$0.isEmpty }
+                    result.append(contentsOf: splitParts)
+                } else {
+                    result.append(remaining)
+                }
+            }
+        }
+
+        return result.isEmpty ? [text] : result
+    }
+
+    private static func parseCodeBlock(_ block: String) -> (language: String?, code: String) {
+        let lines = block.components(separatedBy: "\n")
+        guard lines.count >= 2 else { return (nil, block) }
+
+        let firstLine = lines[0]
+        let language = firstLine.dropFirst(3).trimmingCharacters(in: .whitespaces)
+
+        var codeLines = Array(lines.dropFirst())
+        if codeLines.last?.hasPrefix("```") == true {
+            codeLines = Array(codeLines.dropLast())
+        }
+
+        return (language.isEmpty ? nil : language, codeLines.joined(separator: "\n"))
+    }
+
 }
 
 private struct CodeBlockView: View {
@@ -126,13 +226,3 @@ private struct CodeBlockView: View {
     }
 }
 
-private struct MarkdownSegment: Identifiable {
-    let id = UUID()
-    let type: SegmentType
-    let text: String
-}
-
-private enum SegmentType {
-    case text
-    case code(language: String?)
-}

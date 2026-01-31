@@ -4,20 +4,39 @@ import SwiftData
 struct ChatView: View {
     @State private var messageText: String = ""
     @State private var wsManager = WebSocketManager.shared
+    @State private var clearedAfter: Date? = nil
+    @State private var isWaitingForResponse = false
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var settings: AppSettings
-    
+
     @Query(sort: \ChatMessage.timestamp, order: .forward) private var messages: [ChatMessage]
-    
+
     private var filteredMessages: [ChatMessage] {
-        messages.filter { $0.sessionKey == settings.activeSessionId }
+        messages.filter { message in
+            message.sessionKey.lowercased() == settings.activeSessionId.lowercased() &&
+            (clearedAfter == nil || message.timestamp > clearedAfter!)
+        }
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            ConnectionStatusView(status: wsManager.connectionStatus)
-                .padding(.horizontal)
-                .background(.ultraThinMaterial)
+            // Header with connection status and clear button
+            HStack {
+                ConnectionStatusView(status: wsManager.connectionStatus)
+                Spacer()
+                if !filteredMessages.isEmpty {
+                    Button("Clear") {
+                        clearChat()
+                    }
+                    .font(.caption)
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
+                    .help("Clear chat view")
+                }
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 4)
+            .background(.ultraThinMaterial)
 
             ScrollViewReader { proxy in
                 ScrollView {
@@ -25,6 +44,11 @@ struct ChatView: View {
                         ForEach(filteredMessages) { message in
                             MessageBubble(message: message)
                         }
+
+                        if isWaitingForResponse {
+                            TypingIndicator()
+                        }
+
                         Color.clear.frame(height: 1).id("bottom")
                     }
                     .padding(24)
@@ -48,6 +72,7 @@ struct ChatView: View {
             loadHistoryFromGateway()
         }
         .onChange(of: settings.activeSessionId) {
+            clearedAfter = nil  // Reset clear state when switching sessions
             loadHistoryFromGateway()
         }
     }
@@ -60,6 +85,11 @@ struct ChatView: View {
     private func setupMessageHandler() {
         wsManager.onMessageReceived = { gatewayMessage in
             DispatchQueue.main.async {
+                // Hide typing indicator when response arrives
+                if !gatewayMessage.isFromUser {
+                    isWaitingForResponse = false
+                }
+
                 // The query will automatically update the view if the session matches
                 let chatMessage = ChatMessage(
                     content: gatewayMessage.content,
@@ -107,6 +137,12 @@ struct ChatView: View {
 
         wsManager.sendChatMessage(content: messageText, sessionId: settings.activeSessionId)
         messageText = ""
+        isWaitingForResponse = true
+    }
+
+    private func clearChat() {
+        // Just hide messages in UI, don't delete from storage
+        clearedAfter = Date()
     }
 }
 
@@ -178,5 +214,39 @@ struct ConnectionStatusView: View {
             Text(status.displayText).font(.caption).foregroundColor(.secondary)
         }
         .padding(.vertical, 4)
+    }
+}
+
+struct TypingIndicator: View {
+    @State private var animationOffset = 0
+
+    var body: some View {
+        HStack {
+            HStack(spacing: 4) {
+                ForEach(0..<3) { index in
+                    Circle()
+                        .fill(Color.secondary)
+                        .frame(width: 8, height: 8)
+                        .opacity(animationOffset == index ? 1.0 : 0.4)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color(.textBackgroundColor))
+            .cornerRadius(16)
+
+            Spacer(minLength: 50)
+        }
+        .onAppear {
+            startAnimation()
+        }
+    }
+
+    private func startAnimation() {
+        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                animationOffset = (animationOffset + 1) % 3
+            }
+        }
     }
 }
