@@ -24,165 +24,366 @@ struct MarkdownText: View {
     }
 }
 
-// Keep a more robust version that handles code blocks with copy buttons
+// MARK: - Content Types for Rich Rendering
+
+enum RichContentBlock: Identifiable {
+    case text(String)
+    case codeBlock(language: String?, code: String)
+    case suggestion(String)
+    case sectionCard(title: String, content: [RichContentBlock])
+    case styledHeader(String, content: String)
+
+    var id: String {
+        switch self {
+        case .text(let s): return "text-\(s.prefix(50).hashValue)"
+        case .codeBlock(_, let code): return "code-\(code.prefix(50).hashValue)"
+        case .suggestion(let s): return "suggestion-\(s.hashValue)"
+        case .sectionCard(let title, _): return "section-\(title.hashValue)"
+        case .styledHeader(let h, _): return "header-\(h.hashValue)"
+        }
+    }
+}
+
+// MARK: - Rich Markdown Text with Enhanced Rendering
+
 struct RichMarkdownText: View {
     let content: String
-    private let paragraphs: [String]
+    var onSuggestionTapped: ((String) -> Void)?
 
-    init(content: String) {
+    private let blocks: [RichContentBlock]
+
+    init(content: String, onSuggestionTapped: ((String) -> Void)? = nil) {
         self.content = content
-        self.paragraphs = Self.parseIntoParagraphs(content)
+        self.onSuggestionTapped = onSuggestionTapped
+        self.blocks = Self.parseContent(content)
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
-                if paragraph.hasPrefix("```") {
-                    // Code block
-                    let parts = Self.parseCodeBlock(paragraph)
-                    CodeBlockView(language: parts.language, code: parts.code)
-                } else {
-                    // Regular text paragraph
-                    Text((try? AttributedString(markdown: paragraph)) ?? AttributedString(paragraph))
-                        .textSelection(.enabled)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .lineSpacing(4)
-                }
+            ForEach(blocks) { block in
+                renderBlock(block)
             }
         }
     }
 
-    private static func parseIntoParagraphs(_ text: String) -> [String] {
-        var result: [String] = []
-        var current = ""
+    @ViewBuilder
+    private func renderBlock(_ block: RichContentBlock) -> some View {
+        switch block {
+        case .text(let text):
+            Text((try? AttributedString(markdown: text)) ?? AttributedString(text))
+                .textSelection(.enabled)
+                .fixedSize(horizontal: false, vertical: true)
+                .lineSpacing(4)
+
+        case .codeBlock(let language, let code):
+            CodeBlockView(language: language, code: code)
+
+        case .suggestion(let suggestion):
+            SuggestionChipView(suggestion: suggestion, onTap: onSuggestionTapped)
+
+        case .sectionCard(let title, let content):
+            SectionCardView(title: title, content: content, onSuggestionTapped: onSuggestionTapped)
+
+        case .styledHeader(let header, let content):
+            StyledHeaderView(header: header, content: content)
+        }
+    }
+
+    // MARK: - Content Parsing
+
+    private static func parseContent(_ text: String) -> [RichContentBlock] {
+        var blocks: [RichContentBlock] = []
+        var currentText = ""
         var inCodeBlock = false
+        var codeBlockContent = ""
+        var codeBlockLanguage: String?
 
         let lines = text.components(separatedBy: "\n")
+        var i = 0
 
-        for line in lines {
+        while i < lines.count {
+            let line = lines[i]
+
+            // Handle code blocks
             if line.hasPrefix("```") {
                 if inCodeBlock {
-                    // End of code block
-                    current += line
-                    result.append(current.trimmingCharacters(in: .whitespaces))
-                    current = ""
+                    // End code block
+                    blocks.append(contentsOf: processTextBlock(currentText))
+                    currentText = ""
+                    blocks.append(.codeBlock(language: codeBlockLanguage, code: codeBlockContent.trimmingCharacters(in: .newlines)))
                     inCodeBlock = false
+                    codeBlockContent = ""
+                    codeBlockLanguage = nil
                 } else {
-                    // Start of code block - save any pending text first
-                    if !current.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        result.append(contentsOf: splitTextIntoParagraphs(current))
-                    }
-                    current = line + "\n"
+                    // Start code block
+                    blocks.append(contentsOf: processTextBlock(currentText))
+                    currentText = ""
                     inCodeBlock = true
+                    let lang = String(line.dropFirst(3)).trimmingCharacters(in: .whitespaces)
+                    codeBlockLanguage = lang.isEmpty ? nil : lang
                 }
-            } else if inCodeBlock {
-                current += line + "\n"
-            } else {
-                current += line + "\n"
+                i += 1
+                continue
             }
+
+            if inCodeBlock {
+                codeBlockContent += (codeBlockContent.isEmpty ? "" : "\n") + line
+                i += 1
+                continue
+            }
+
+            // Check for numbered section start (e.g., "1. As a Strategic...")
+            if let sectionMatch = matchNumberedSection(line) {
+                blocks.append(contentsOf: processTextBlock(currentText))
+                currentText = ""
+
+                // Collect all lines until next numbered section or end
+                var sectionContent = ""
+                i += 1
+                while i < lines.count {
+                    let nextLine = lines[i]
+                    if matchNumberedSection(nextLine) != nil {
+                        break
+                    }
+                    sectionContent += (sectionContent.isEmpty ? "" : "\n") + nextLine
+                    i += 1
+                }
+
+                let innerBlocks = processTextBlock(sectionContent)
+                blocks.append(.sectionCard(title: sectionMatch, content: innerBlocks))
+                continue
+            }
+
+            currentText += (currentText.isEmpty ? "" : "\n") + line
+            i += 1
         }
 
         // Handle remaining content
-        if !current.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            if inCodeBlock {
-                result.append(current)
-            } else {
-                result.append(contentsOf: splitTextIntoParagraphs(current))
-            }
+        if inCodeBlock {
+            blocks.append(.codeBlock(language: codeBlockLanguage, code: codeBlockContent))
+        } else {
+            blocks.append(contentsOf: processTextBlock(currentText))
         }
 
-        return result.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        return blocks.filter { block in
+            switch block {
+            case .text(let t): return !t.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            default: return true
+            }
+        }
     }
 
-    private static func splitTextIntoParagraphs(_ text: String) -> [String] {
-        // Split on double newlines first
-        var paragraphs = text.components(separatedBy: "\n\n")
+    private static func matchNumberedSection(_ line: String) -> String? {
+        // Match patterns like "1. As a Strategic Thought Partner" or "2. As a Content & Brand-Building Assistant"
+        let pattern = #"^(\d+)\.\s+(.+)$"#
+        guard let regex = try? NSRegularExpression(pattern: pattern),
+              let match = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)),
+              let titleRange = Range(match.range(at: 2), in: line) else {
+            return nil
+        }
+        return String(line[titleRange])
+    }
+
+    private static func processTextBlock(_ text: String) -> [RichContentBlock] {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
+
+        var blocks: [RichContentBlock] = []
+
+        // Split by paragraphs first
+        let paragraphs = trimmed.components(separatedBy: "\n\n")
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
 
-        // Further split paragraphs that have bold headers (e.g., "**Header:** content")
-        var result: [String] = []
-        for para in paragraphs {
-            let split = splitOnBoldHeaders(para)
-            result.append(contentsOf: split)
-        }
-
-        return result
-    }
-
-    private static func splitOnBoldHeaders(_ text: String) -> [String] {
-        // Pattern: **Bold Header:** followed by content
-        // Split these into separate paragraphs for better readability
-        let pattern = #"(\*\*[^*]+:\*\*)"#
-        guard let regex = try? NSRegularExpression(pattern: pattern) else {
-            return [text]
-        }
-
-        let range = NSRange(text.startIndex..., in: text)
-        let matches = regex.matches(in: text, range: range)
-
-        if matches.isEmpty {
-            return [text]
-        }
-
-        var result: [String] = []
-        var lastEnd = text.startIndex
-
-        for match in matches {
-            guard let matchRange = Range(match.range, in: text) else { continue }
-
-            // Add text before this header (if any)
-            if matchRange.lowerBound > lastEnd {
-                let beforeText = String(text[lastEnd..<matchRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
-                if !beforeText.isEmpty {
-                    result.append(beforeText)
-                }
+        for paragraph in paragraphs {
+            // Check for "Try asking:" patterns
+            if let suggestion = extractSuggestion(paragraph) {
+                blocks.append(.suggestion(suggestion))
+                continue
             }
 
-            lastEnd = matchRange.lowerBound
+            // Check for styled header pattern (**Header:** content)
+            if let (header, content) = extractStyledHeader(paragraph) {
+                blocks.append(.styledHeader(header, content: content))
+                continue
+            }
+
+            // Regular text
+            blocks.append(.text(paragraph))
         }
 
-        // Add remaining text (includes the headers and their content)
-        if lastEnd < text.endIndex {
-            let remaining = String(text[lastEnd...]).trimmingCharacters(in: .whitespacesAndNewlines)
-            if !remaining.isEmpty {
-                // Split by bold headers but keep header with its content
-                let headerPattern = #"(\*\*[^*]+:\*\*\s*)"#
-                if let headerRegex = try? NSRegularExpression(pattern: headerPattern) {
-                    let parts = headerRegex.stringByReplacingMatches(
-                        in: remaining,
-                        range: NSRange(remaining.startIndex..., in: remaining),
-                        withTemplate: "\n\n$1"
-                    )
-                    let splitParts = parts.components(separatedBy: "\n\n")
-                        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                        .filter { !$0.isEmpty }
-                    result.append(contentsOf: splitParts)
-                } else {
-                    result.append(remaining)
-                }
+        return blocks
+    }
+
+    private static func extractSuggestion(_ text: String) -> String? {
+        // Match "Try asking: "..." " or "*Try asking: "..."*"
+        let patterns = [
+            #"^\*?Try asking:\*?\s*["""](.+?)["""]"#,
+            #"^Try asking:\s*["""](.+?)["""]"#
+        ]
+
+        for pattern in patterns {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+               let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
+               let suggestionRange = Range(match.range(at: 1), in: text) {
+                return String(text[suggestionRange])
             }
         }
-
-        return result.isEmpty ? [text] : result
+        return nil
     }
 
-    private static func parseCodeBlock(_ block: String) -> (language: String?, code: String) {
-        let lines = block.components(separatedBy: "\n")
-        guard lines.count >= 2 else { return (nil, block) }
-
-        let firstLine = lines[0]
-        let language = firstLine.dropFirst(3).trimmingCharacters(in: .whitespaces)
-
-        var codeLines = Array(lines.dropFirst())
-        if codeLines.last?.hasPrefix("```") == true {
-            codeLines = Array(codeLines.dropLast())
+    private static func extractStyledHeader(_ text: String) -> (String, String)? {
+        // Match **Header:** followed by content
+        let pattern = #"^\*\*([^*]+):\*\*\s*(.+)$"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators),
+              let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
+              let headerRange = Range(match.range(at: 1), in: text),
+              let contentRange = Range(match.range(at: 2), in: text) else {
+            return nil
         }
-
-        return (language.isEmpty ? nil : language, codeLines.joined(separator: "\n"))
+        return (String(text[headerRange]), String(text[contentRange]))
     }
-
 }
+
+// MARK: - Suggestion Chip View
+
+private struct SuggestionChipView: View {
+    let suggestion: String
+    let onTap: ((String) -> Void)?
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: { onTap?(suggestion) }) {
+            HStack(spacing: 6) {
+                Image(systemName: "text.bubble")
+                    .font(.caption)
+                Text(suggestion)
+                    .font(.subheadline)
+                    .lineLimit(2)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(isHovered ? Color.accentColor.opacity(0.25) : Color.accentColor.opacity(0.15))
+            .foregroundColor(.accentColor)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+        .help("Click to use this suggestion")
+    }
+}
+
+// MARK: - Section Card View
+
+private struct SectionCardView: View {
+    let title: String
+    let content: [RichContentBlock]
+    let onSuggestionTapped: ((String) -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Section header
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .font(.subheadline)
+                    .foregroundColor(.accentColor)
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+            }
+
+            // Section content
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(content) { block in
+                    renderBlock(block)
+                }
+            }
+        }
+        .padding(16)
+        .background(Color(.windowBackgroundColor))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(.separatorColor).opacity(0.5), lineWidth: 1)
+        )
+    }
+
+    @ViewBuilder
+    private func renderBlock(_ block: RichContentBlock) -> some View {
+        switch block {
+        case .text(let text):
+            Text((try? AttributedString(markdown: text)) ?? AttributedString(text))
+                .textSelection(.enabled)
+                .fixedSize(horizontal: false, vertical: true)
+                .lineSpacing(4)
+
+        case .codeBlock(let language, let code):
+            CodeBlockView(language: language, code: code)
+
+        case .suggestion(let suggestion):
+            SuggestionChipView(suggestion: suggestion, onTap: onSuggestionTapped)
+
+        case .styledHeader(let header, let content):
+            StyledHeaderView(header: header, content: content)
+
+        case .sectionCard(let title, let innerContent):
+            // Nested cards - render flat to avoid too much nesting
+            NestedSectionView(title: title, content: innerContent, onSuggestionTapped: onSuggestionTapped)
+        }
+    }
+}
+
+// Helper view to break recursive type inference
+private struct NestedSectionView: View {
+    let title: String
+    let content: [RichContentBlock]
+    let onSuggestionTapped: ((String) -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.subheadline.weight(.semibold))
+            ForEach(content) { block in
+                switch block {
+                case .text(let text):
+                    Text((try? AttributedString(markdown: text)) ?? AttributedString(text))
+                        .textSelection(.enabled)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineSpacing(4)
+                case .codeBlock(let language, let code):
+                    CodeBlockView(language: language, code: code)
+                case .suggestion(let suggestion):
+                    SuggestionChipView(suggestion: suggestion, onTap: onSuggestionTapped)
+                case .styledHeader(let header, let content):
+                    StyledHeaderView(header: header, content: content)
+                case .sectionCard:
+                    EmptyView() // Don't support deeply nested sections
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Styled Header View
+
+private struct StyledHeaderView: View {
+    let header: String
+    let content: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(header)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.accentColor)
+
+            Text((try? AttributedString(markdown: content)) ?? AttributedString(content))
+                .textSelection(.enabled)
+                .fixedSize(horizontal: false, vertical: true)
+                .lineSpacing(4)
+        }
+    }
+}
+
+// MARK: - Code Block View
 
 private struct CodeBlockView: View {
     let language: String?
@@ -225,4 +426,3 @@ private struct CodeBlockView: View {
         NSPasteboard.general.setString(code, forType: .string)
     }
 }
-

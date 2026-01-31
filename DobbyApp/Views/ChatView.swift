@@ -42,7 +42,9 @@ struct ChatView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 16) {
                         ForEach(filteredMessages) { message in
-                            MessageBubble(message: message)
+                            MessageBubble(message: message, onSuggestionTapped: { suggestion in
+                                messageText = suggestion
+                            })
                         }
 
                         if isWaitingForResponse {
@@ -173,24 +175,25 @@ struct MessageInputView: View {
 
 struct MessageBubble: View {
     let message: ChatMessage
+    var onSuggestionTapped: ((String) -> Void)?
 
     var body: some View {
         HStack {
             if message.isFromUser { Spacer(minLength: 50) }
-            
+
             VStack(alignment: .leading, spacing: 4) {
-                RichMarkdownText(content: message.content)
+                RichMarkdownText(content: message.content, onSuggestionTapped: message.isFromUser ? nil : onSuggestionTapped)
                     .padding(12)
                     .background(message.isFromUser ? .blue : Color(.textBackgroundColor))
                     .foregroundColor(message.isFromUser ? .white : .primary)
                     .cornerRadius(16)
-                
+
                 Text(message.timestamp, style: .time)
                     .font(.caption2)
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 8)
             }
-            
+
             if !message.isFromUser { Spacer(minLength: 50) }
         }
     }
