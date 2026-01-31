@@ -320,9 +320,9 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
     }
     
     private func sendConnectHandshake() {
-        guard let authToken = AppSettings.shared.authToken, !authToken.isEmpty else {
+        let authToken = AppSettings.shared.authToken
+        guard !authToken.isEmpty else {
             print("❌ Auth token not set. Cannot connect.")
-            // Optionally, update connection status to failed or prompt user
             return
         }
 
