@@ -13,9 +13,51 @@ Native macOS application for the Dobby AI assistant, built with Swift + SwiftUI.
 
 ## Status
 
-🚧 **Design Phase** — See [DESIGN.md](DESIGN.md) for full specifications
+🚧 **Phase 1 (MVP) — In Progress**
 
-📐 **UI/UX Design** — See [UI-DESIGN.md](UI-DESIGN.md) for visual guidelines
+### ✅ Completed
+- App structure with sidebar navigation
+- Task Kanban board (Backlog → In Process → Completed)
+- Task creation UI with priority levels
+- Chat interface with message bubbles
+- **WebSocket integration** (full bidirectional communication)
+- Connection status indicator
+- Auto-reconnect with exponential backoff
+- Task sync with gateway (create, update, progress tracking)
+
+### 🚧 Next Up
+- **Test with live gateway** (protocol is ready!)
+- Load & display chat history
+- Drag & drop for task columns
+- Menu bar quick access
+- Keyboard shortcuts (⌘D, ⌘K)
+
+## Project Structure
+
+```
+dobby-mac-app/
+├── DobbyApp/                  # Swift source code
+│   ├── DobbyApp.swift         # App entry point
+│   ├── Models/                # SwiftData models
+│   ├── Views/                 # SwiftUI views
+│   ├── Network/               # WebSocket manager
+│   └── Resources/             # Assets
+├── docs/                      # Documentation
+│   ├── DESIGN.md              # Full design specifications
+│   ├── UI-DESIGN.md           # Visual guidelines
+│   ├── WEBSOCKET.md           # WebSocket protocol
+│   └── ...                    # Other docs
+├── scripts/                   # Test scripts
+│   ├── test_gateway.py        # Gateway test server
+│   └── run_test_gateway.sh    # Test runner
+└── DobbyApp.xcodeproj/        # Xcode project
+```
+
+### 📚 Documentation
+- [docs/DESIGN.md](docs/DESIGN.md) — Full design specifications
+- [docs/UI-DESIGN.md](docs/UI-DESIGN.md) — Visual guidelines
+- [docs/WEBSOCKET.md](docs/WEBSOCKET.md) — WebSocket protocol & implementation
+- [docs/XCODE-SETUP.md](docs/XCODE-SETUP.md) — Xcode setup instructions
 
 ## Tech Stack
 

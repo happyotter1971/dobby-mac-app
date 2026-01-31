@@ -10,14 +10,16 @@ struct DobbyApp: App {
         WindowGroup {
             ContentView()
                 .frame(minWidth: 1000, minHeight: 700)
+                .environmentObject(AppSettings.shared)
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
-        .modelContainer(for: [Task.self])
-        
+        .modelContainer(for: [Task.self, ChatMessage.self, ChatSession.self])
+
         // Settings window
         Settings {
             SettingsView()
+                .environmentObject(AppSettings.shared)
         }
     }
 }
@@ -26,8 +28,13 @@ struct DobbyApp: App {
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
     var popover: NSPopover?
+    var wsManager = WebSocketManager.shared
     
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Connect to Clawdbot Gateway
+        print("🚀 Connecting to Clawdbot Gateway...")
+        wsManager.connect()
+        
         // Create menu bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
@@ -41,6 +48,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover = NSPopover()
         popover?.contentViewController = NSHostingController(rootView: MenuBarView())
         popover?.behavior = .transient
+    }
+    
+    func applicationWillTerminate(_ notification: Notification) {
+        // Clean disconnect
+        print("👋 Disconnecting from gateway...")
+        wsManager.disconnect()
     }
     
     @objc func togglePopover() {

@@ -15,7 +15,10 @@ final class Task {
     var linkedMessageIds: [String]
     var progressPercent: Int?
     var resultSummary: String?
-    
+    var dueDate: Date?
+    var reminder: Date?
+    var tags: [String]
+
     init(
         id: UUID = UUID(),
         title: String,
@@ -28,7 +31,10 @@ final class Task {
         notes: String? = nil,
         linkedMessageIds: [String] = [],
         progressPercent: Int? = nil,
-        resultSummary: String? = nil
+        resultSummary: String? = nil,
+        dueDate: Date? = nil,
+        reminder: Date? = nil,
+        tags: [String] = []
     ) {
         self.id = id
         self.title = title
@@ -42,6 +48,9 @@ final class Task {
         self.linkedMessageIds = linkedMessageIds
         self.progressPercent = progressPercent
         self.resultSummary = resultSummary
+        self.dueDate = dueDate
+        self.reminder = reminder
+        self.tags = tags
     }
 }
 
@@ -49,6 +58,7 @@ enum TaskStatus: String, Codable {
     case backlog
     case inProcess
     case completed
+    case archived
 }
 
 enum TaskPriority: String, Codable {

@@ -1,144 +1,173 @@
 import SwiftUI
+import SwiftData
 
 struct ChatView: View {
-    let sessionName: String
     @State private var messageText: String = ""
-    @State private var messages: [Message] = []
+    @State private var wsManager = WebSocketManager.shared
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var settings: AppSettings
     
+    @Query(sort: \ChatMessage.timestamp, order: .forward) private var messages: [ChatMessage]
+    
+    private var filteredMessages: [ChatMessage] {
+        messages.filter { $0.sessionKey == settings.activeSessionId }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            // Session tabs
-            SessionTabsView()
-            
-            // Messages area
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 16) {
-                    ForEach(messages) { message in
-                        MessageBubble(message: message)
+            ConnectionStatusView(status: wsManager.connectionStatus)
+                .padding(.horizontal)
+                .background(.ultraThinMaterial)
+
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 16) {
+                        ForEach(filteredMessages) { message in
+                            MessageBubble(message: message)
+                        }
+                        Color.clear.frame(height: 1).id("bottom")
                     }
+                    .padding(24)
                 }
-                .padding(24)
+                .onChange(of: filteredMessages.count) {
+                    withAnimation { proxy.scrollTo("bottom") }
+                }
+                .onAppear {
+                    proxy.scrollTo("bottom", anchor: .bottom)
+                }
             }
             
-            // Input field
-            HStack(spacing: 12) {
-                Image(systemName: "mic.fill")
-                    .foregroundStyle(.secondary)
-                
-                TextField("Type or speak...", text: $messageText, axis: .vertical)
-                    .textFieldStyle(.plain)
-                    .lineLimit(1...10)
-                    .onSubmit {
-                        send Message()
-                    }
-                
-                Button(action: sendMessage) {
-                    Image(systemName: "paperplane.fill")
-                }
-                .buttonStyle(.borderless)
-                .disabled(messageText.isEmpty)
-            }
-            .padding(16)
-            .background(.ultraThinMaterial)
+            MessageInputView(
+                messageText: $messageText,
+                isConnected: wsManager.isConnected,
+                onSend: sendMessage
+            )
+        }
+        .onAppear {
+            setupMessageHandler()
+            loadHistoryFromGateway()
+        }
+        .onChange(of: settings.activeSessionId) {
+            loadHistoryFromGateway()
         }
     }
     
-    private func sendMessage() {
-        guard !messageText.isEmpty else { return }
-        
-        let newMessage = Message(
-            content: messageText,
-            isFromUser: true
-        )
-        
-        messages.append(newMessage)
-        messageText = ""
-        
-        // Simulate response (in real app, send to WebSocket)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            let response = Message(
-                content: "This is a placeholder response. WebSocket connection coming in Phase 2!",
-                isFromUser: false
-            )
-            messages.append(response)
+    private func loadHistoryFromGateway() {
+        guard !settings.activeSessionId.isEmpty else { return }
+        wsManager.loadChatHistory(sessionId: settings.activeSessionId)
+    }
+
+    private func setupMessageHandler() {
+        wsManager.onMessageReceived = { gatewayMessage in
+            DispatchQueue.main.async {
+                // The query will automatically update the view if the session matches
+                let chatMessage = ChatMessage(
+                    content: gatewayMessage.content,
+                    isFromUser: gatewayMessage.isFromUser,
+                    sessionKey: gatewayMessage.sessionKey,
+                    messageRole: gatewayMessage.isFromUser ? "user" : "assistant"
+                )
+                modelContext.insert(chatMessage)
+            }
         }
+        
+        wsManager.onHistoryLoaded = { historyMessages in
+            DispatchQueue.main.async {
+                let existingMessages = try? modelContext.fetch(FetchDescriptor<ChatMessage>())
+                for historyMsg in historyMessages {
+                    let isDuplicate = existingMessages?.contains {
+                        $0.content == historyMsg.content && abs($0.timestamp.timeIntervalSince(historyMsg.timestamp)) < 1
+                    } ?? false
+
+                    if !isDuplicate {
+                        let chatMessage = ChatMessage(
+                            content: historyMsg.content,
+                            isFromUser: historyMsg.role == "user",
+                            sessionKey: settings.activeSessionId,
+                            timestamp: historyMsg.timestamp,
+                            messageRole: historyMsg.role
+                        )
+                        modelContext.insert(chatMessage)
+                    }
+                }
+            }
+        }
+    }
+
+    private func sendMessage() {
+        guard !messageText.isEmpty, wsManager.isConnected, !settings.activeSessionId.isEmpty else { return }
+
+        let chatMessage = ChatMessage(
+            content: messageText,
+            isFromUser: true,
+            sessionKey: settings.activeSessionId,
+            messageRole: "user"
+        )
+        modelContext.insert(chatMessage)
+
+        wsManager.sendChatMessage(content: messageText, sessionId: settings.activeSessionId)
+        messageText = ""
     }
 }
 
-struct SessionTabsView: View {
+struct MessageInputView: View {
+    @Binding var messageText: String
+    let isConnected: Bool
+    let onSend: () -> Void
+    
     var body: some View {
-        HStack(spacing: 8) {
-            SessionTab(name: "Main", isActive: true)
-            SessionTab(name: "Research", isActive: false)
-            SessionTab(name: "Strategy", isActive: false)
+        HStack(spacing: 12) {
+            Image(systemName: "mic.fill").foregroundColor(.secondary)
             
-            Spacer()
+            TextField("Type a message...", text: $messageText, axis: .vertical)
+                .textFieldStyle(.plain)
+                .lineLimit(1...5)
+                .onSubmit(onSend)
             
-            Button(action: {}) {
-                Image(systemName: "plus")
+            Button(action: onSend) {
+                Image(systemName: "arrow.up.circle.fill").font(.title2)
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.plain)
+            .disabled(messageText.isEmpty || !isConnected)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .padding(12)
         .background(.ultraThinMaterial)
     }
 }
 
-struct SessionTab: View {
-    let name: String
-    let isActive: Bool
-    
-    var body: some View {
-        Text(name)
-            .font(.system(size: 13, weight: isActive ? .semibold : .regular))
-            .foregroundStyle(isActive ? .primary : .secondary)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(isActive ? Color.accentColor.opacity(0.1) : Color.clear)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
-    }
-}
-
 struct MessageBubble: View {
-    let message: Message
-    
+    let message: ChatMessage
+
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            if !message.isFromUser {
-                Image(systemName: "sparkles")
-                    .foregroundStyle(.accent Color)
-            }
+        HStack {
+            if message.isFromUser { Spacer(minLength: 50) }
             
-            VStack(alignment: message.isFromUser ? .trailing : .leading, spacing: 4) {
-                Text(message.content)
-                    .padding(16)
-                    .background(message.isFromUser ? Color.accentColor : Color(.windowBackgroundColor))
+            VStack(alignment: .leading, spacing: 4) {
+                RichMarkdownText(content: message.content)
+                    .padding(12)
+                    .background(message.isFromUser ? .blue : Color(.textBackgroundColor))
                     .foregroundColor(message.isFromUser ? .white : .primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .cornerRadius(16)
                 
                 Text(message.timestamp, style: .time)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 8)
             }
             
-            if message.isFromUser {
-                Spacer()
-            }
+            if !message.isFromUser { Spacer(minLength: 50) }
         }
-        .frame(maxWidth: 800, alignment: message.isFromUser ? .trailing : .leading)
     }
 }
 
-// Message model
-struct Message: Identifiable {
-    let id = UUID()
-    let content: String
-    let isFromUser: Bool
-    let timestamp = Date()
-}
-
-#Preview {
-    ChatView(sessionName: "Main")
-        .frame(width: 1000, height: 700)
+struct ConnectionStatusView: View {
+    let status: ConnectionStatus
+    
+    var body: some View {
+        HStack(spacing: 6) {
+            Circle().fill(status.color).frame(width: 8, height: 8)
+            Text(status.displayText).font(.caption).foregroundColor(.secondary)
+        }
+        .padding(.vertical, 4)
+    }
 }
