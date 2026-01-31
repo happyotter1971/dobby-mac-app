@@ -5,7 +5,7 @@ struct MarkdownText: View {
     let content: String
 
     var body: some View {
-        Text(markdown: content)
+        Text((try? AttributedString(markdown: content)) ?? AttributedString(content))
             .textSelection(.enabled)
             .fixedSize(horizontal: false, vertical: true)
     }
@@ -26,7 +26,7 @@ struct RichMarkdownText: View {
             ForEach(segments) { segment in
                 switch segment.type {
                 case .text:
-                    Text(markdown: segment.text)
+                    Text((try? AttributedString(markdown: segment.text)) ?? AttributedString(segment.text))
                         .textSelection(.enabled)
                 case .code(let language):
                     CodeBlockView(language: language, code: segment.text)

@@ -162,10 +162,19 @@ struct MessageBubble: View {
 
 struct ConnectionStatusView: View {
     let status: ConnectionStatus
-    
+
+    private var statusColor: Color {
+        switch status {
+        case .disconnected: return .gray
+        case .connecting: return .yellow
+        case .connected: return .green
+        case .failed: return .red
+        }
+    }
+
     var body: some View {
         HStack(spacing: 6) {
-            Circle().fill(status.color).frame(width: 8, height: 8)
+            Circle().fill(statusColor).frame(width: 8, height: 8)
             Text(status.displayText).font(.caption).foregroundColor(.secondary)
         }
         .padding(.vertical, 4)
