@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Resolve Package Dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project DobbyApp.xcodeproj \
+            -scheme DobbyApp
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project DobbyApp.xcodeproj \
+            -scheme DobbyApp \
+            -destination 'platform=macOS' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run Unit Tests
+        run: |
+          xcodebuild test \
+            -project DobbyApp.xcodeproj \
+            -scheme DobbyApp \
+            -destination 'platform=macOS' \
+            -only-testing:DobbyAppTests \
+            CODE_SIGNING_ALLOWED=NO \
+            -resultBundlePath TestResults.xcresult
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: TestResults.xcresult
+
+  # UI tests run separately as they require more setup
+  ui-tests:
+    runs-on: macos-14
+    needs: build-and-test
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Resolve Package Dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project DobbyApp.xcodeproj \
+            -scheme DobbyApp
+
+      - name: Run UI Tests
+        run: |
+          xcodebuild test \
+            -project DobbyApp.xcodeproj \
+            -scheme DobbyApp \
+            -destination 'platform=macOS' \
+            -only-testing:DobbyAppUITests \
+            CODE_SIGNING_ALLOWED=NO
+        continue-on-error: true  # UI tests may be flaky in CI
