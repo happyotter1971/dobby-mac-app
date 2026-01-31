@@ -23,7 +23,7 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
     var onHistoryLoaded: (([HistoryMessage]) -> Void)?
     
     // Gateway URL
-    private let gatewayURLString = "ws://127.0.0.1:18789"
+    private let gatewayURLString = "ws://127.0.0.1:18790"
     
     // Reconnection
     private var reconnectTimer: Timer?
@@ -321,12 +321,7 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
     
     private func sendConnectHandshake() {
         let authToken = AppSettings.shared.authToken
-        guard !authToken.isEmpty else {
-            print("❌ Auth token not set. Cannot connect.")
-            return
-        }
-
-        print("🤝 Initiating connect handshake...")
+        print("🤝 Initiating connect handshake... (token: \(authToken.isEmpty ? "none" : "set"))")
         let params = ConnectParams(
             minProtocol: 3,
             maxProtocol: 3,
@@ -341,7 +336,7 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
                 deviceFamily: "Mac",
                 modelIdentifier: "MacOS"
             ),
-            auth: AuthInfo(token: authToken)
+            auth: authToken.isEmpty ? nil : AuthInfo(token: authToken)
         )
 
         sendRequest(method: "connect", params: params, id: "connect")
