@@ -38,13 +38,57 @@ class WebSocketManager: NSObject, URLSessionWebSocketDelegate {
     // Accumulated agent response text for each runId
     private var agentResponseText: [String: String] = [:]
 
+    // Session factory for dependency injection (testing)
+    private var sessionFactory: (() -> URLSession)?
 
     private override init() {
         super.init()
         setupURLSession()
     }
-    
+
+    #if DEBUG
+    /// Test initializer that allows injecting a custom URLSession factory
+    init(sessionFactory: @escaping () -> URLSession) {
+        self.sessionFactory = sessionFactory
+        super.init()
+        self.urlSession = sessionFactory()
+    }
+
+    /// Test hook: Get the number of pending requests
+    var testPendingRequestsCount: Int { pendingRequests.count }
+
+    /// Test hook: Get the number of executing tasks
+    var testExecutingTasksCount: Int { executingTasks.count }
+
+    /// Test hook: Get the current reconnect attempts
+    var testReconnectAttempts: Int { reconnectAttempts }
+
+    /// Test hook: Get accumulated response text for a runId
+    func testGetAgentResponseText(for runId: String) -> String? {
+        agentResponseText[runId]
+    }
+
+    /// Test hook: Get the task ID for a runId
+    func testGetTaskId(for runId: String) -> UUID? {
+        executingTasks[runId]
+    }
+
+    /// Test hook: Manually set connection state for testing
+    func testSetConnectionState(isConnected: Bool, status: ConnectionStatus) {
+        self.isConnected = isConnected
+        self.connectionStatus = status
+    }
+
+    /// Test hook: Access the websocket task
+    var testWebSocket: URLSessionWebSocketTask? { webSocket }
+    #endif
+
     private func setupURLSession() {
+        // If a factory was provided (for testing), use that instead
+        if let factory = sessionFactory {
+            urlSession = factory()
+            return
+        }
         let config = URLSessionConfiguration.default
         // Use longer timeouts for WebSocket - it's a long-lived connection
         config.timeoutIntervalForRequest = 300  // 5 minutes

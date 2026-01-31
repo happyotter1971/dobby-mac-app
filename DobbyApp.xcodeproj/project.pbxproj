@@ -3,55 +3,147 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04F675A97E9975F0E0EEAD81 /* ChatSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16535C1844BD4C115DD0DDFE /* ChatSession.swift */; };
+		0CDD781ABBF645BE6255A219 /* AppSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47AD8A6E5D1A0F59F0AC299E /* AppSettingsTests.swift */; };
 		1BC8EB629EF52288DED092CB /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA4FEA770F613529FBB54E75 /* ChatView.swift */; };
-		2A896121122AC1BD59135C86 /* MarkdownText.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4BFF722EF923B07D2CEC732 /* MarkdownText.swift */; };
+		1CDFB2EA4E576F8664C47FDE /* WebSocketMessageParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E9CF557D60A7AF4D3419DF /* WebSocketMessageParsingTests.swift */; };
+		265BBFD7903AB2EF8B1E0D8C /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 7388F5939BCE0A8D5BB87A47 /* SnapshotTesting */; };
+		2B5271541F1FB4B3B90286E6 /* ChatFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 990D062CCC5A9AEA43DC0E02 /* ChatFlowUITests.swift */; };
+		2E301CBBCBD5962027B05ED0 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE4180454AE212AC76B95683 /* ChatMessage.swift */; };
+		30333911FC18E7D2D07E2617 /* MockURLSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF06285FF8B59B68D0CA3A45 /* MockURLSession.swift */; };
+		3477D53972756A594F0671C9 /* TestModelContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD1900CE8011C954C3EE602D /* TestModelContainer.swift */; };
+		36968F126F95820DB5BB9F34 /* TasksViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09A3A7FF6658039D094A333 /* TasksViewTests.swift */; };
+		3F4AE80058C9A4707DCFFAB5 /* WebSocketAuthenticationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1438197D0FE1440E4887B36 /* WebSocketAuthenticationTests.swift */; };
+		3FA8BA5C974C2562A496EB2A /* WebSocketReconnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AA9A97A430B3AB83956A23 /* WebSocketReconnectionTests.swift */; };
+		433C9CFD7AD66DB269C4E958 /* WebSocketConnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43241D369C17753093EE8193 /* WebSocketConnectionTests.swift */; };
 		48AF64ED039719AA33AAEA30 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49217E12346A4692E19B867D /* SidebarView.swift */; };
+		4B0313E1DB5A49FDC541BD37 /* MarkdownText.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFA348A50A483B09638E0DF2 /* MarkdownText.swift */; };
 		51E18BF18575AAE53ADB70CF /* PlaceholderViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA4395112B7932EBF6718940 /* PlaceholderViews.swift */; };
 		52AF077F519606CF6EEBAE4A /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E6029D6E2CA4947C14185C9 /* Task.swift */; };
 		54545C548A35C54BCCF373F6 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B18677327F3D46295B880AEB /* ContentView.swift */; };
 		748134E51D28D695EBD8A02E /* TasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03F4B049609A5914013D915 /* TasksView.swift */; };
+		74F4929F707F3C879ACA7F9B /* WebSocketTestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633DB4A0F52EB0CE94D1D069 /* WebSocketTestFixtures.swift */; };
+		7EA0261A344389B9277FB3E5 /* MockWebSocketTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95592F314218A86F1296DCBD /* MockWebSocketTask.swift */; };
+		826E17C197193384936026A0 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A92FD6977AD15038BCCE07B6 /* AppSettings.swift */; };
+		82A86F438EB72D2F42FBF582 /* ChatViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD064B6610E6A17C3E2EFCFF /* ChatViewTests.swift */; };
 		8CF5C1C3585746F12AE74306 /* DobbyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A532D502349EA6F738BD5F3 /* DobbyApp.swift */; };
-		9FF35967E55FF3C601C3CF24 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48B7D4213C32DF0254792EB /* ChatMessage.swift */; };
-		AAD632A30B3E3799B7CF9AC0 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F59C06CE21C686779FC77A1A /* AppSettings.swift */; };
+		912BDEBDF8DBDB6E91AA82B1 /* WebSocketIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFCBC032D08F6B8692289E5 /* WebSocketIntegrationTests.swift */; };
+		944AB4276C2287AD210BE232 /* ChatViewSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FE6600B0EC0C58AC7BBBFC /* ChatViewSnapshotTests.swift */; };
+		AF279CBFF21BC3EA52850DF6 /* TaskManagementUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF70ED632A46DF6F39D1A32F /* TaskManagementUITests.swift */; };
+		B181B3E6D5F1E83FA753DD90 /* TaskDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3A506364F58D7351A8E837 /* TaskDetailSheet.swift */; };
+		B3AEC637219FD1116E2B0CBE /* ChatSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99D7EC11561BAD4DD69501A8 /* ChatSessionTests.swift */; };
+		C4EEAC82CEE2EC3431184087 /* AsyncTestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6E09CE219A5D3704C3F3F9 /* AsyncTestHelpers.swift */; };
 		CAA0C92A11AE9919DE252085 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466414792F72DF82EF9ED278 /* Assets.xcassets */; };
-		D733127443AE418798DB47C2748E6E29 /* TaskDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C437635264214D36A0268C1306F4DB3F /* TaskDetailSheet.swift */; };
-		E043513773FD425A908EFFC5DFA84E9A /* ChatSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B4CC974193463D92365AC4C9BFE125 /* ChatSession.swift */; };
+		D7BB7A7DB582158E9936A90A /* ChatMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15F0924D5F909571A0E5DED /* ChatMessageTests.swift */; };
+		E26AA8CDD2B92D07A03E404C /* TaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E562F87D9ED9EA274FABA680 /* TaskTests.swift */; };
+		F9EA7EC6A8B4600EAC25AC49 /* MockUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93B26289A7AD5180DB912473 /* MockUserDefaults.swift */; };
 		FBA8A91637D83AE1820B1BF7 /* WebSocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 804C80B83D1EAE6795E55E92 /* WebSocketManager.swift */; };
+		FF2EE7DD9C96E8E1A0838C85 /* TasksViewSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15101ADDAD29463111DAB147 /* TasksViewSnapshotTests.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		0C6DF332DA0FFB071276DA2B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B1311A7FA3F2CAFEE3304EC6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4DED56E7F607E752F1D395D6;
+			remoteInfo = DobbyApp;
+		};
+		D3FDC30DC1CBC1B808D0C958 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B1311A7FA3F2CAFEE3304EC6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4DED56E7F607E752F1D395D6;
+			remoteInfo = DobbyApp;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		09B3238E1CCFA91239F83263 /* DobbyAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DobbyAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		15101ADDAD29463111DAB147 /* TasksViewSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksViewSnapshotTests.swift; sourceTree = "<group>"; };
+		16535C1844BD4C115DD0DDFE /* ChatSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSession.swift; sourceTree = "<group>"; };
+		24084D5A2B25B74462201697 /* DobbyAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DobbyAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3AFCBC032D08F6B8692289E5 /* WebSocketIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketIntegrationTests.swift; sourceTree = "<group>"; };
+		43241D369C17753093EE8193 /* WebSocketConnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketConnectionTests.swift; sourceTree = "<group>"; };
 		466414792F72DF82EF9ED278 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		47AD8A6E5D1A0F59F0AC299E /* AppSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsTests.swift; sourceTree = "<group>"; };
 		49217E12346A4692E19B867D /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		4A532D502349EA6F738BD5F3 /* DobbyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DobbyApp.swift; sourceTree = "<group>"; };
 		4C607EED14E4B2FC965A1B60 /* DobbyApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DobbyApp.entitlements; sourceTree = "<group>"; };
 		5E6029D6E2CA4947C14185C9 /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
-		69B4CC974193463D92365AC4C9BFE125 /* ChatSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSession.swift; sourceTree = "<group>"; };
-		7691E427F0D3CDD032730EA1 /* Dobby.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dobby.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		633DB4A0F52EB0CE94D1D069 /* WebSocketTestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketTestFixtures.swift; sourceTree = "<group>"; };
+		6D6E09CE219A5D3704C3F3F9 /* AsyncTestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncTestHelpers.swift; sourceTree = "<group>"; };
+		7691E427F0D3CDD032730EA1 /* DobbyApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DobbyApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		804C80B83D1EAE6795E55E92 /* WebSocketManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketManager.swift; sourceTree = "<group>"; };
+		82E9CF557D60A7AF4D3419DF /* WebSocketMessageParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketMessageParsingTests.swift; sourceTree = "<group>"; };
+		93AA9A97A430B3AB83956A23 /* WebSocketReconnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketReconnectionTests.swift; sourceTree = "<group>"; };
+		93B26289A7AD5180DB912473 /* MockUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockUserDefaults.swift; sourceTree = "<group>"; };
+		95592F314218A86F1296DCBD /* MockWebSocketTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWebSocketTask.swift; sourceTree = "<group>"; };
+		990D062CCC5A9AEA43DC0E02 /* ChatFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatFlowUITests.swift; sourceTree = "<group>"; };
+		99D7EC11561BAD4DD69501A8 /* ChatSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSessionTests.swift; sourceTree = "<group>"; };
+		A09A3A7FF6658039D094A333 /* TasksViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksViewTests.swift; sourceTree = "<group>"; };
+		A1438197D0FE1440E4887B36 /* WebSocketAuthenticationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketAuthenticationTests.swift; sourceTree = "<group>"; };
+		A92FD6977AD15038BCCE07B6 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		AD064B6610E6A17C3E2EFCFF /* ChatViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewTests.swift; sourceTree = "<group>"; };
+		AF06285FF8B59B68D0CA3A45 /* MockURLSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockURLSession.swift; sourceTree = "<group>"; };
 		B18677327F3D46295B880AEB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		B48B7D4213C32DF0254792EB /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		BA4395112B7932EBF6718940 /* PlaceholderViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderViews.swift; sourceTree = "<group>"; };
+		BD1900CE8011C954C3EE602D /* TestModelContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestModelContainer.swift; sourceTree = "<group>"; };
 		C03F4B049609A5914013D915 /* TasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksView.swift; sourceTree = "<group>"; };
-		C437635264214D36A0268C1306F4DB3F /* TaskDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskDetailSheet.swift; sourceTree = "<group>"; };
-		E4BFF722EF923B07D2CEC732 /* MarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownText.swift; sourceTree = "<group>"; };
+		C15F0924D5F909571A0E5DED /* ChatMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageTests.swift; sourceTree = "<group>"; };
+		C2FE6600B0EC0C58AC7BBBFC /* ChatViewSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewSnapshotTests.swift; sourceTree = "<group>"; };
+		CE4180454AE212AC76B95683 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		DF70ED632A46DF6F39D1A32F /* TaskManagementUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskManagementUITests.swift; sourceTree = "<group>"; };
+		E562F87D9ED9EA274FABA680 /* TaskTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskTests.swift; sourceTree = "<group>"; };
 		EA4FEA770F613529FBB54E75 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
-		F59C06CE21C686779FC77A1A /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		EFA348A50A483B09638E0DF2 /* MarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownText.swift; sourceTree = "<group>"; };
+		FB3A506364F58D7351A8E837 /* TaskDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskDetailSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		406DD7E62D7CD674ADB0D04E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				265BBFD7903AB2EF8B1E0D8C /* SnapshotTesting in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
+		0A4F379B5510CCF4B9CA05FD /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				6D6E09CE219A5D3704C3F3F9 /* AsyncTestHelpers.swift */,
+				BD1900CE8011C954C3EE602D /* TestModelContainer.swift */,
+				633DB4A0F52EB0CE94D1D069 /* WebSocketTestFixtures.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 		18AE85248F1A4D44833415AF /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				F59C06CE21C686779FC77A1A /* AppSettings.swift */,
-				B48B7D4213C32DF0254792EB /* ChatMessage.swift */,
-				69B4CC974193463D92365AC4C9BFE125 /* ChatSession.swift */,
+				A92FD6977AD15038BCCE07B6 /* AppSettings.swift */,
+				CE4180454AE212AC76B95683 /* ChatMessage.swift */,
+				16535C1844BD4C115DD0DDFE /* ChatSession.swift */,
 				5E6029D6E2CA4947C14185C9 /* Task.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		204D14AF4B52A53D98D430A0 /* DobbyAppUITests */ = {
+			isa = PBXGroup;
+			children = (
+				990D062CCC5A9AEA43DC0E02 /* ChatFlowUITests.swift */,
+				DF70ED632A46DF6F39D1A32F /* TaskManagementUITests.swift */,
+			);
+			path = DobbyAppUITests;
 			sourceTree = "<group>";
 		};
 		3178D35C00140651B80CEE7C /* Resources */ = {
@@ -65,7 +157,9 @@
 		446C565266369769F33E0D15 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7691E427F0D3CDD032730EA1 /* Dobby.app */,
+				7691E427F0D3CDD032730EA1 /* DobbyApp.app */,
+				24084D5A2B25B74462201697 /* DobbyAppTests.xctest */,
+				09B3238E1CCFA91239F83263 /* DobbyAppUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -77,34 +171,99 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
-		7C3A4B9D234E5F8A19B6D712 /* Components */ = {
+		518127945269E1952966F96E /* Integration */ = {
 			isa = PBXGroup;
 			children = (
-				E4BFF722EF923B07D2CEC732 /* MarkdownText.swift */,
+				3AFCBC032D08F6B8692289E5 /* WebSocketIntegrationTests.swift */,
 			);
-			path = Components;
+			path = Integration;
+			sourceTree = "<group>";
+		};
+		545A39A90FB03153C9CF4597 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AD064B6610E6A17C3E2EFCFF /* ChatViewTests.swift */,
+				A09A3A7FF6658039D094A333 /* TasksViewTests.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		851365DAD338140E410C612E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				47AD8A6E5D1A0F59F0AC299E /* AppSettingsTests.swift */,
+				C15F0924D5F909571A0E5DED /* ChatMessageTests.swift */,
+				99D7EC11561BAD4DD69501A8 /* ChatSessionTests.swift */,
+				E562F87D9ED9EA274FABA680 /* TaskTests.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		8B962413906EA0179E6302B8 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				7C3A4B9D234E5F8A19B6D712 /* Components */,
+				E294768C6CE556E9F1B17A9F /* Components */,
 				EA4FEA770F613529FBB54E75 /* ChatView.swift */,
 				B18677327F3D46295B880AEB /* ContentView.swift */,
 				BA4395112B7932EBF6718940 /* PlaceholderViews.swift */,
 				49217E12346A4692E19B867D /* SidebarView.swift */,
-				C437635264214D36A0268C1306F4DB3F /* TaskDetailSheet.swift */,
+				FB3A506364F58D7351A8E837 /* TaskDetailSheet.swift */,
 				C03F4B049609A5914013D915 /* TasksView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		8BE34BC7BC7C8FAE845E5808 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				AF06285FF8B59B68D0CA3A45 /* MockURLSession.swift */,
+				93B26289A7AD5180DB912473 /* MockUserDefaults.swift */,
+				95592F314218A86F1296DCBD /* MockWebSocketTask.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+		9FA25D61A3434F1D955662CA /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				A1438197D0FE1440E4887B36 /* WebSocketAuthenticationTests.swift */,
+				43241D369C17753093EE8193 /* WebSocketConnectionTests.swift */,
+				82E9CF557D60A7AF4D3419DF /* WebSocketMessageParsingTests.swift */,
+				93AA9A97A430B3AB83956A23 /* WebSocketReconnectionTests.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+		CC711736345148DD63AF4888 /* DobbyAppTests */ = {
+			isa = PBXGroup;
+			children = (
+				0A4F379B5510CCF4B9CA05FD /* Helpers */,
+				518127945269E1952966F96E /* Integration */,
+				8BE34BC7BC7C8FAE845E5808 /* Mocks */,
+				851365DAD338140E410C612E /* Models */,
+				9FA25D61A3434F1D955662CA /* Network */,
+				FD3B591C1C5254A4CDE26A93 /* Snapshots */,
+				545A39A90FB03153C9CF4597 /* Views */,
+			);
+			path = DobbyAppTests;
 			sourceTree = "<group>";
 		};
 		CF82F533182BC6A746B94998 = {
 			isa = PBXGroup;
 			children = (
 				FB056B8558A6706175E755FF /* DobbyApp */,
+				CC711736345148DD63AF4888 /* DobbyAppTests */,
+				204D14AF4B52A53D98D430A0 /* DobbyAppUITests */,
 				446C565266369769F33E0D15 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		E294768C6CE556E9F1B17A9F /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				EFA348A50A483B09638E0DF2 /* MarkdownText.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		FB056B8558A6706175E755FF /* DobbyApp */ = {
@@ -129,6 +288,15 @@
 			path = Network;
 			sourceTree = "<group>";
 		};
+		FD3B591C1C5254A4CDE26A93 /* Snapshots */ = {
+			isa = PBXGroup;
+			children = (
+				C2FE6600B0EC0C58AC7BBBFC /* ChatViewSnapshotTests.swift */,
+				15101ADDAD29463111DAB147 /* TasksViewSnapshotTests.swift */,
+			);
+			path = Snapshots;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -147,8 +315,46 @@
 			packageProductDependencies = (
 			);
 			productName = DobbyApp;
-			productReference = 7691E427F0D3CDD032730EA1 /* Dobby.app */;
+			productReference = 7691E427F0D3CDD032730EA1 /* DobbyApp.app */;
 			productType = "com.apple.product-type.application";
+		};
+		57F96DD97599CFB78998907C /* DobbyAppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 54E7762F628FF47549FE520E /* Build configuration list for PBXNativeTarget "DobbyAppUITests" */;
+			buildPhases = (
+				0A2C9B5658EBCFC6216888BC /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				42B649BAE5D7D39FB4440E8D /* PBXTargetDependency */,
+			);
+			name = DobbyAppUITests;
+			packageProductDependencies = (
+			);
+			productName = DobbyAppUITests;
+			productReference = 09B3238E1CCFA91239F83263 /* DobbyAppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		CF8A34B0654D4B88893EE5F7 /* DobbyAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ABE2D8912283C75EED6CD505 /* Build configuration list for PBXNativeTarget "DobbyAppTests" */;
+			buildPhases = (
+				0401203E3EC300EAE9427CA6 /* Sources */,
+				406DD7E62D7CD674ADB0D04E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7B497D57EF36790FE41CC9AB /* PBXTargetDependency */,
+			);
+			name = DobbyAppTests;
+			packageProductDependencies = (
+				7388F5939BCE0A8D5BB87A47 /* SnapshotTesting */,
+			);
+			productName = DobbyAppTests;
+			productReference = 24084D5A2B25B74462201697 /* DobbyAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -157,11 +363,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2620;
+				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					4DED56E7F607E752F1D395D6 = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
+					};
+					57F96DD97599CFB78998907C = {
+						TestTargetID = 4DED56E7F607E752F1D395D6;
 					};
 				};
 			};
@@ -175,10 +384,16 @@
 			);
 			mainGroup = CF82F533182BC6A746B94998;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8FD324FABA8DB9B298644169 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+			);
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				4DED56E7F607E752F1D395D6 /* DobbyApp */,
+				CF8A34B0654D4B88893EE5F7 /* DobbyAppTests */,
+				57F96DD97599CFB78998907C /* DobbyAppUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -195,27 +410,75 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		0401203E3EC300EAE9427CA6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0CDD781ABBF645BE6255A219 /* AppSettingsTests.swift in Sources */,
+				C4EEAC82CEE2EC3431184087 /* AsyncTestHelpers.swift in Sources */,
+				D7BB7A7DB582158E9936A90A /* ChatMessageTests.swift in Sources */,
+				B3AEC637219FD1116E2B0CBE /* ChatSessionTests.swift in Sources */,
+				944AB4276C2287AD210BE232 /* ChatViewSnapshotTests.swift in Sources */,
+				82A86F438EB72D2F42FBF582 /* ChatViewTests.swift in Sources */,
+				30333911FC18E7D2D07E2617 /* MockURLSession.swift in Sources */,
+				F9EA7EC6A8B4600EAC25AC49 /* MockUserDefaults.swift in Sources */,
+				7EA0261A344389B9277FB3E5 /* MockWebSocketTask.swift in Sources */,
+				E26AA8CDD2B92D07A03E404C /* TaskTests.swift in Sources */,
+				FF2EE7DD9C96E8E1A0838C85 /* TasksViewSnapshotTests.swift in Sources */,
+				36968F126F95820DB5BB9F34 /* TasksViewTests.swift in Sources */,
+				3477D53972756A594F0671C9 /* TestModelContainer.swift in Sources */,
+				3F4AE80058C9A4707DCFFAB5 /* WebSocketAuthenticationTests.swift in Sources */,
+				433C9CFD7AD66DB269C4E958 /* WebSocketConnectionTests.swift in Sources */,
+				912BDEBDF8DBDB6E91AA82B1 /* WebSocketIntegrationTests.swift in Sources */,
+				1CDFB2EA4E576F8664C47FDE /* WebSocketMessageParsingTests.swift in Sources */,
+				3FA8BA5C974C2562A496EB2A /* WebSocketReconnectionTests.swift in Sources */,
+				74F4929F707F3C879ACA7F9B /* WebSocketTestFixtures.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0A2C9B5658EBCFC6216888BC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B5271541F1FB4B3B90286E6 /* ChatFlowUITests.swift in Sources */,
+				AF279CBFF21BC3EA52850DF6 /* TaskManagementUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B2EE9557350BC8E3DA3CF933 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AAD632A30B3E3799B7CF9AC0 /* AppSettings.swift in Sources */,
-				9FF35967E55FF3C601C3CF24 /* ChatMessage.swift in Sources */,
-				E043513773FD425A908EFFC5DFA84E9A /* ChatSession.swift in Sources */,
+				826E17C197193384936026A0 /* AppSettings.swift in Sources */,
+				2E301CBBCBD5962027B05ED0 /* ChatMessage.swift in Sources */,
+				04F675A97E9975F0E0EEAD81 /* ChatSession.swift in Sources */,
 				1BC8EB629EF52288DED092CB /* ChatView.swift in Sources */,
 				54545C548A35C54BCCF373F6 /* ContentView.swift in Sources */,
 				8CF5C1C3585746F12AE74306 /* DobbyApp.swift in Sources */,
-				2A896121122AC1BD59135C86 /* MarkdownText.swift in Sources */,
+				4B0313E1DB5A49FDC541BD37 /* MarkdownText.swift in Sources */,
 				51E18BF18575AAE53ADB70CF /* PlaceholderViews.swift in Sources */,
 				48AF64ED039719AA33AAEA30 /* SidebarView.swift in Sources */,
 				52AF077F519606CF6EEBAE4A /* Task.swift in Sources */,
-				D733127443AE418798DB47C2748E6E29 /* TaskDetailSheet.swift in Sources */,
+				B181B3E6D5F1E83FA753DD90 /* TaskDetailSheet.swift in Sources */,
 				748134E51D28D695EBD8A02E /* TasksView.swift in Sources */,
 				FBA8A91637D83AE1820B1BF7 /* WebSocketManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		42B649BAE5D7D39FB4440E8D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4DED56E7F607E752F1D395D6 /* DobbyApp */;
+			targetProxy = 0C6DF332DA0FFB071276DA2B /* PBXContainerItemProxy */;
+		};
+		7B497D57EF36790FE41CC9AB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4DED56E7F607E752F1D395D6 /* DobbyApp */;
+			targetProxy = D3FDC30DC1CBC1B808D0C958 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1AA915D4CEA423F57DE6F2FD /* Debug */ = {
@@ -226,7 +489,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -281,7 +543,6 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -306,12 +567,31 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.9;
 			};
 			name = Debug;
+		};
+		3A0148F3D832137AD0840853 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_GENERATION_MODE = GeneratedFile;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dobby.DobbyApp.Tests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Dobby.app/Contents/MacOS/Dobby";
+			};
+			name = Release;
 		};
 		99171AC88ED38AC9D780FA24 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -347,7 +627,6 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -365,12 +644,71 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.9;
 			};
 			name = Release;
+		};
+		B3DAA955589CE67CAFD6E551 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_GENERATION_MODE = GeneratedFile;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dobby.DobbyApp.UITests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+				TEST_TARGET_NAME = DobbyApp;
+			};
+			name = Release;
+		};
+		DF3EEA518E2FDEE6AE79EC17 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_GENERATION_MODE = GeneratedFile;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dobby.DobbyApp.UITests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+				TEST_TARGET_NAME = DobbyApp;
+			};
+			name = Debug;
+		};
+		EE56383FFC67BC81C58708EF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_GENERATION_MODE = GeneratedFile;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dobby.DobbyApp.Tests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Dobby.app/Contents/MacOS/Dobby";
+			};
+			name = Debug;
 		};
 		EEC9E71248BF0F5199F1E21F /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -380,7 +718,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -404,6 +741,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		54E7762F628FF47549FE520E /* Build configuration list for PBXNativeTarget "DobbyAppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DF3EEA518E2FDEE6AE79EC17 /* Debug */,
+				B3DAA955589CE67CAFD6E551 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		ABE2D8912283C75EED6CD505 /* Build configuration list for PBXNativeTarget "DobbyAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EE56383FFC67BC81C58708EF /* Debug */,
+				3A0148F3D832137AD0840853 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		B971E5E68F0D108D72E80F1C /* Build configuration list for PBXNativeTarget "DobbyApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -423,6 +778,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8FD324FABA8DB9B298644169 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.15.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7388F5939BCE0A8D5BB87A47 /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FD324FABA8DB9B298644169 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B1311A7FA3F2CAFEE3304EC6 /* Project object */;
 }

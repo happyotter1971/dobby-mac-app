@@ -54,14 +54,14 @@ final class Task {
     }
 }
 
-enum TaskStatus: String, Codable {
+enum TaskStatus: String, Codable, CaseIterable {
     case backlog
     case inProcess
     case completed
     case archived
 }
 
-enum TaskPriority: String, Codable {
+enum TaskPriority: String, Codable, CaseIterable {
     case high
     case medium
     case low
@@ -83,7 +83,7 @@ enum TaskPriority: String, Codable {
     }
 }
 
-enum TaskSource: String, Codable {
+enum TaskSource: String, Codable, CaseIterable {
     case dobby
     case user
     case automated

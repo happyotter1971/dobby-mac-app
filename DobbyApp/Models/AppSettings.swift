@@ -8,60 +8,82 @@ class AppSettings: ObservableObject {
     @Published var isDarkMode: Bool {
         didSet {
             print("🌓 isDarkMode changed to: \(isDarkMode)")
-            UserDefaults.standard.set(isDarkMode, forKey: "isDarkMode")
+            defaults.set(isDarkMode, forKey: "isDarkMode")
             applyAppearance()
         }
     }
 
     @Published var notificationsEnabled: Bool {
         didSet {
-            UserDefaults.standard.set(notificationsEnabled, forKey: "notificationsEnabled")
+            defaults.set(notificationsEnabled, forKey: "notificationsEnabled")
         }
     }
 
     @Published var autoCreateTasks: Bool {
         didSet {
-            UserDefaults.standard.set(autoCreateTasks, forKey: "autoCreateTasks")
+            defaults.set(autoCreateTasks, forKey: "autoCreateTasks")
         }
     }
 
     @Published var syncToTelegram: Bool {
         didSet {
-            UserDefaults.standard.set(syncToTelegram, forKey: "syncToTelegram")
+            defaults.set(syncToTelegram, forKey: "syncToTelegram")
         }
     }
 
     @Published var activeSessionId: String {
         didSet {
-            UserDefaults.standard.set(activeSessionId, forKey: "activeSessionId")
+            defaults.set(activeSessionId, forKey: "activeSessionId")
         }
     }
 
     @Published var authToken: String {
         didSet {
-            UserDefaults.standard.set(authToken, forKey: "authToken")
+            defaults.set(authToken, forKey: "authToken")
         }
     }
 
     @Published var taskArchiveDays: Int {
         didSet {
-            UserDefaults.standard.set(taskArchiveDays, forKey: "taskArchiveDays")
+            defaults.set(taskArchiveDays, forKey: "taskArchiveDays")
         }
     }
 
+    // UserDefaults instance used for persistence (injectable for testing)
+    private let defaults: UserDefaults
+
     private init() {
+        self.defaults = UserDefaults.standard
         // Load saved values from UserDefaults
-        self.isDarkMode = UserDefaults.standard.bool(forKey: "isDarkMode")
-        self.notificationsEnabled = UserDefaults.standard.object(forKey: "notificationsEnabled") as? Bool ?? true
-        self.autoCreateTasks = UserDefaults.standard.object(forKey: "autoCreateTasks") as? Bool ?? true
-        self.syncToTelegram = UserDefaults.standard.bool(forKey: "syncToTelegram")
-        self.activeSessionId = UserDefaults.standard.string(forKey: "activeSessionId") ?? ""
-        self.authToken = UserDefaults.standard.string(forKey: "authToken") ?? ""
-        self.taskArchiveDays = UserDefaults.standard.object(forKey: "taskArchiveDays") as? Int ?? 30
+        self.isDarkMode = defaults.bool(forKey: "isDarkMode")
+        self.notificationsEnabled = defaults.object(forKey: "notificationsEnabled") as? Bool ?? true
+        self.autoCreateTasks = defaults.object(forKey: "autoCreateTasks") as? Bool ?? true
+        self.syncToTelegram = defaults.bool(forKey: "syncToTelegram")
+        self.activeSessionId = defaults.string(forKey: "activeSessionId") ?? ""
+        self.authToken = defaults.string(forKey: "authToken") ?? ""
+        self.taskArchiveDays = defaults.object(forKey: "taskArchiveDays") as? Int ?? 30
 
         // Apply appearance on init
         applyAppearance()
     }
+
+    #if DEBUG
+    /// Test initializer that accepts a custom UserDefaults instance
+    init(defaults: UserDefaults, skipAppearance: Bool = true) {
+        self.defaults = defaults
+        self.isDarkMode = defaults.bool(forKey: "isDarkMode")
+        self.notificationsEnabled = defaults.object(forKey: "notificationsEnabled") as? Bool ?? true
+        self.autoCreateTasks = defaults.object(forKey: "autoCreateTasks") as? Bool ?? true
+        self.syncToTelegram = defaults.bool(forKey: "syncToTelegram")
+        self.activeSessionId = defaults.string(forKey: "activeSessionId") ?? ""
+        self.authToken = defaults.string(forKey: "authToken") ?? ""
+        self.taskArchiveDays = defaults.object(forKey: "taskArchiveDays") as? Int ?? 30
+
+        if !skipAppearance {
+            applyAppearance()
+        }
+    }
+    #endif
 
     private func applyAppearance() {
         DispatchQueue.main.async {
