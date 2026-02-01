@@ -22,7 +22,7 @@ final class TasksViewSnapshotTests: XCTestCase {
             XCTFail("Failed to create test container: \(error)")
         }
         // Set to true to record new snapshots
-        isRecording = true
+        // isRecording = true
     }
 
     override func tearDown() {
